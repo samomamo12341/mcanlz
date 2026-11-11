@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#07090e" />
+  <title>MEME AI TRADER | Solana & Axiom Radarı</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #07090e;
+      --card-bg: rgba(17, 24, 39, 0.78);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #10b981;
+      --primary-glow: rgba(16, 185, 129, 0.25);
+      --danger: #f43f5e;
+      --warning: #f59e0b;
+      --accent: #38bdf8;
+      --axiom: #8b5cf6;
+      --axiom-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+      --axiom-glow: rgba(139, 92, 246, 0.35);
+      --safe-bottom: env(safe-area-inset-bottom, 16px);
+      --safe-top: env(safe-area-inset-top, 16px);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.06) 0px, transparent 50%);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      padding-top: calc(var(--safe-top) + 8px);
+      padding-bottom: calc(var(--safe-bottom) + 24px);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .app-container { max-width: 520px; margin: 0 auto; padding: 0 14px; }
+
+    /* Üst Başlık */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 4px 2px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-icon {
+      width: 34px; height: 34px;
+      background: var(--axiom-gradient);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; color: #fff;
+      box-shadow: 0 0 16px var(--axiom-glow);
+    }
+    .brand-title { font-weight: 800; font-size: 1.1rem; letter-spacing: -0.5px; }
+    .live-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.65rem;
+      padding: 4px 9px;
+      border-radius: 20px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--primary);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .pulse-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 8px var(--primary);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.35); opacity: 0.6; }
+    }
+
+    /* Kategori Seçici (Early Gems & Momentum) */
+    .category-tabs {
+      display: flex;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.45);
+      padding: 4px;
+      border-radius: 14px;
+      border: 1px solid var(--card-border);
+      margin-bottom: 12px;
+    }
+    .cat-btn {
+      flex: 1;
+      padding: 10px 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.76rem;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .cat-btn.active.cat-gem {
+      background: rgba(56, 189, 248, 0.16);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.15);
+    }
+    .cat-btn.active.cat-mom {
+      background: rgba(16, 185, 129, 0.16);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.15);
+    }
+
+    /* Hızlı Filtre ve Arama */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .search-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-size: 0.78rem;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .refresh-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 7px 11px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+    .refresh-pill:active { background: rgba(255, 255, 255, 0.12); }
+    .refresh-pill.spinning svg { animation: spin 0.8s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* İstatistik Özeti */
+    .summary-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      margin-bottom: 14px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* Token Kartları */
+    .token-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 15px;
+      margin-bottom: 12px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .token-card:active { transform: scale(0.99); }
+
+    .token-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .token-meta { display: flex; align-items: center; gap: 10px; }
+    .token-symbol-wrap {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.85rem; color: var(--accent);
+    }
+    .token-name-box h3 {
+      font-size: 0.96rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .token-age-tag {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Durum Rozetleri */
+    .status-badge {
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-candidate {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      color: var(--primary);
+    }
+    .badge-watch {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      color: var(--warning);
+    }
+    .badge-red {
+      background: rgba(244, 63, 94, 0.2);
+      border: 1px solid rgba(244, 63, 94, 0.5);
+      color: var(--danger);
+    }
+
+    /* Metrik Tablosu */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.32);
+      border-radius: 12px;
+      padding: 9px;
+      margin-bottom: 10px;
+    }
+    .metric-item { text-align: center; }
+    .metric-lbl {
+      font-size: 0.58rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+      letter-spacing: 0.3px;
+    }
+    .metric-val {
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    /* Skor Çubuğu */
+    .score-bar-wrap {
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+    .score-text-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      margin-bottom: 4px;
+    }
+    .bar-bg {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    /* Aksiyon Satırı: Axiom Butonu & Kontrat Kopyalama */
+    .action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .btn-axiom {
+      flex: 1.5;
+      background: var(--axiom-gradient);
+      color: #ffffff;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.8rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px var(--axiom-glow);
+      transition: transform 0.15s, opacity 0.15s;
+    }
+    .btn-axiom:active { transform: scale(0.98); opacity: 0.9; }
+    .btn-copy {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 10px 10px;
+      border-radius: 12px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .btn-copy:active { background: rgba(255, 255, 255, 0.14); }
+    .btn-info {
+      width: 38px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* Bildirim Toast */
+    .toast-msg {
+      position: fixed;
+      top: calc(var(--safe-top) + 12px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-30px);
+      background: #1e1b4b;
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      color: #f3f4f6;
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .toast-msg.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px);
+      z-index: 150; display: none; align-items: flex-end; justify-content: center;
+      padding-bottom: var(--safe-bottom);
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-content {
+      width: 100%; max-width: 500px; background: #0f1422;
+      border: 1px solid var(--card-border); border-top-left-radius: 24px; border-top-right-radius: 24px;
+      padding: 22px 18px; max-height: 85vh; overflow-y: auto;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+      animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .close-btn { background: rgba(255, 255, 255, 0.1); border: none; color: var(--text-muted); width: 28px; height: 28px; border-radius: 50%; cursor: pointer; }
+
+    .risk-breakdown-box { background: rgba(0, 0, 0, 0.35); border-radius: 12px; padding: 12px; margin: 10px 0; font-size: 0.76rem; }
+    .risk-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .risk-row:last-child { border-bottom: none; }
+
+    .empty-state { text-align: center; padding: 40px 16px; color: var(--text-muted); font-size: 0.82rem; }
+  </style>
+</head>
+<body>
+
+  <div id="toast" class="toast-msg"></div>
+
+  <div class="app-container">
+
+    <!-- Üst Başlık -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">A</div>
+        <div>
+          <div class="brand-title">MEME AI TRADER</div>
+        </div>
+      </div>
+      <div class="live-tag">
+        <div class="pulse-dot"></div>
+        Axiom Radarı
+      </div>
+    </header>
+
+    <!-- Kategori Seçici: EARLY GEMS vs MOMENTUM -->
+    <div class="category-tabs">
+      <button class="cat-btn cat-gem active" id="tabEarlyGems" onclick="switchCategory('early')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        EARLY GEMS (Taze Havuzlar)
+      </button>
+      <button class="cat-btn cat-mom" id="tabMomentum" onclick="switchCategory('momentum')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+        MOMENTUM (İvmelenenler)
+      </button>
+    </div>
+
+    <!-- Hızlı Filtre ve Arama Barı -->
+    <div class="filter-bar">
+      <input type="text" id="searchInput" class="search-input" placeholder="Sembol veya kontrat ara..." oninput="handleSearch()">
+      <button class="refresh-pill" id="refreshBtn" onclick="fetchSolanaRadar(true)">
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        <span id="countdownLabel">30</span>s
+      </button>
+    </div>
+
+    <!-- Özet Bilgi -->
+    <div class="summary-strip">
+      <span id="categoryDesc">Düşük market cap (<$1M), taze ve henüz pump yaşamamış tokenler.</span>
+      <span id="pairCountBadge" style="color: var(--accent); font-weight: 700;">0 Token</span>
+    </div>
+
+    <!-- Token Kart Listesi -->
+    <main id="tokenCardList">
+      <div class="empty-state">Solana meme coinleri taranıyor...</div>
+    </main>
+
+  </div>
+
+  <!-- AÇIKLANABİLİR SKOR VE GÜVENLİK ANALİZİ MODALI -->
+  <div id="scoreModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTokenTitle">Token Analiz Raporu</h3>
+        <button class="close-btn" onclick="closeModal('scoreModal')">&times;</button>
+      </div>
+
+      <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4;">
+        ⚠️ <strong>Açıklanabilir Algoritma:</strong> Puanlama kesin kâr vaadi içermez. Yalnızca zincir üstü hacim artışı, alıcı yoğunluğu ve RugCheck doğrulamalarını matematiksel olarak puanlar.
+      </div>
+
+      <div class="risk-breakdown-box" id="modalScoreBreakdown"></div>
+
+      <div id="modalAxiomContainer" style="margin-top: 12px;"></div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================================
+       1. DURUM YÖNETİMİ & SABİTLER
+       ========================================================================= */
+    const SOL_MINT = "So11111111111111111111111111111111111111112";
+    const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+
+    let livePairs = [];
+    let currentCategory = 'early'; // 'early' veya 'momentum'
+    let countdownSec = 30;
+    let refreshTimer = null;
+    let isFetching = false;
+
+    /* =========================================================================
+       2. CANLI VERİ ÇEKME & ÇOK KANALLI RADAR
+       ========================================================================= */
+    async function fetchSolanaRadar(isManual = false) {
+      if (isFetching) return;
+      isFetching = true;
+
+      const refreshBtn = document.getElementById('refreshBtn');
+      if (refreshBtn) refreshBtn.classList.add('spinning');
+
+      try {
+        // DexScreener halka açık arama uç noktaları (Solana ekosistemi ve Pump pariteleri)
+        const [resSol, resPump] = await Promise.allSettled([
+          fetch('https://api.dexscreener.com/latest/dex/search?q=solana'),
+          fetch('https://api.dexscreener.com/latest/dex/search?q=pump')
+        ]);
+
+        let rawPairs = [];
+        if (resSol.status === 'fulfilled' && resSol.value.ok) {
+          const d = await resSol.value.json();
+          if (d.pairs) rawPairs.push(...d.pairs);
+        }
+        if (resPump.status === 'fulfilled' && resPump.value.ok) {
+          const d = await resPump.value.json();
+          if (d.pairs) rawPairs.push(...d.pairs);
+        }
+
+        if (rawPairs.length === 0) {
+          throw new Error("DexScreener veri döndürmedi.");
+        }
+
+        // Solana zinciri filtresi ve pairAddress bazlı tekilleştirme (Deduplication)
+        const uniqueMap = new Map();
+        for (const p of rawPairs) {
+          if (p.chainId === 'solana' && p.pairAddress && !uniqueMap.has(p.pairAddress)) {
+            const memeToken = extractMemeToken(p);
+            // Mint adresi geçerli olanları kabul et
+            if (memeToken && isValidSolanaMint(memeToken.address)) {
+              p.targetToken = memeToken;
+              uniqueMap.set(p.pairAddress, p);
+            }
+          }
+        }
+
+        const pairsArray = Array.from(uniqueMap.values());
+
+        // RugCheck güvenlik doğrulaması (İlk 12 token için savunmacı ve zaman aşımlı sorgu)
+        for (let i = 0; i < Math.min(12, pairsArray.length); i++) {
+          const pair = pairsArray[i];
+          pair.securityData = await fetchRugCheck(pair.targetToken.address);
+          pair.aiAnalysis = evaluatePair(pair);
+        }
+
+        // Kalanlar için açıklanabilir varsayılan güvenlik durumu
+        for (let i = 12; i < pairsArray.length; i++) {
+          const pair = pairsArray[i];
+          pair.securityData = getUnknownSecurityData();
+          pair.aiAnalysis = evaluatePair(pair);
+        }
+
+        livePairs = pairsArray;
+        renderPairs();
+
+        if (isManual) showToast("Solana radarı güncellendi");
+      } catch (err) {
+        console.error("Radar hatası:", err);
+        showToast("Veri çekilemedi: Mevcut önbellek korundu.");
+      } finally {
+        isFetching = false;
+        countdownSec = 30;
+        if (refreshBtn) refreshBtn.classList.remove('spinning');
+      }
+    }
+
+    /* Gerçek Meme Mint Adresini Çıkarma */
+    function extractMemeToken(pair) {
+      if (pair.baseToken && pair.baseToken.address !== SOL_MINT && pair.baseToken.address !== USDC_MINT) {
+        return pair.baseToken;
+      }
+      if (pair.quoteToken && pair.quoteToken.address !== SOL_MINT && pair.quoteToken.address !== USDC_MINT) {
+        return pair.quoteToken;
+      }
+      return pair.baseToken;
+    }
+
+    function isValidSolanaMint(addr) {
+      return typeof addr === 'string' && addr.length >= 32 && addr.length <= 44 && !addr.includes(' ');
+    }
+
+    /* RugCheck Güvenlik Denetleyicisi */
+    async function fetchRugCheck(mint) {
+      if (!mint) return getUnknownSecurityData();
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2600);
+
+        const res = await fetch(`https://api.rugcheck.xyz/v1/tokens/${mint}/report/summary`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) return getUnknownSecurityData();
+        const data = await res.json();
+        const risks = data.risks || [];
+
+        const isMintRevoked = !risks.some(r => r.name && r.name.toLowerCase().includes('mint'));
+        const isFreezeRevoked = !risks.some(r => r.name && r.name.toLowerCase().includes('freeze'));
+        const isTopHoldersConcentrated = risks.some(r => r.name && r.name.toLowerCase().includes('holder'));
+
+        return {
+          source: 'RugCheck API',
+          mintAuthority: isMintRevoked ? 'REVOKED' : 'ACTIVE',
+          freezeAuthority: isFreezeRevoked ? 'REVOKED' : 'ACTIVE',
+          topHolders: isTopHoldersConcentrated ? 'CONCENTRATED' : 'DISTRIBUTED',
+          rugScore: data.score || 0,
+          verified: true
+        };
+      } catch (e) {
+        return getUnknownSecurityData();
+      }
+    }
+
+    function getUnknownSecurityData() {
+      return {
+        source: 'Doğrulanamadı (Bilinmiyor)',
+        mintAuthority: 'UNKNOWN',
+        freezeAuthority: 'UNKNOWN',
+        topHolders: 'UNKNOWN',
+        rugScore: null,
+        verified: false
+      };
+    }
+
+    /* =========================================================================
+       3. AÇIKLANABİLİR 0-100 PUANLAMA & KATEGORİZASYON MOTORU
+       ========================================================================= */
+    function evaluatePair(p) {
+      const now = Date.now();
+      const createdAt = p.pairCreatedAt || (now - 86400000 * 2);
+      const ageMinutes = Math.max(1, Math.floor((now - createdAt) / 60000));
+      const ageHours = ageMinutes / 60;
+
+      const liq = p.liquidity ? (p.liquidity.usd || 0) : 0;
+      const mcap = p.fdv || p.marketCap || 0;
+      const v5m = p.volume ? (p.volume.m5 || 0) : 0;
+      const v1h = p.volume ? (p.volume.h1 || 0) : 0;
+      const c5m = p.priceChange ? (p.priceChange.m5 || 0) : 0;
+      const tx5m = p.txns && p.txns.m5 ? p.txns.m5 : { buys: 0, sells: 0 };
+      const sec = p.securityData || getUnknownSecurityData();
+
+      // Alt Skorlar (0-25 x 4 = 100)
+      let earlySub = 0;
+      let momSub = 0;
+      let liqSub = 0;
+      let flowSub = 0;
+
+      // 1. Erken Aşama / Düşük Cap (Eski dev coinlere avantaj verilmez)
+      if (ageHours <= 1.5) earlySub += 15;
+      else if (ageHours <= 6) earlySub += 10;
+      else if (ageHours <= 24) earlySub += 5;
+
+      if (mcap > 0 && mcap <= 250000) earlySub += 10;
+      else if (mcap > 0 && mcap <= 800000) earlySub += 6;
+      else if (mcap > 8000000) earlySub += 1; // High cap coinlere puan yok
+
+      // 2. Momentum & Hacim Artış Hızı
+      const expected5m = (v1h / 12);
+      const volGrowthRatio = expected5m > 0 ? (v5m / expected5m) : 1;
+
+      if (volGrowthRatio >= 2.2 && v5m > 4000) momSub += 15;
+      else if (volGrowthRatio >= 1.2 && v5m > 1500) momSub += 10;
+      else if (v5m > 800) momSub += 5;
+
+      if (c5m > 0 && c5m <= 100) momSub += 10;
+      else if (c5m > 100) momSub += 4; // Aşırı tepe riski
+      else if (c5m > -6) momSub += 3;
+
+      // 3. Likidite Derinliği (0-25)
+      if (liq >= 35000) liqSub = 25;
+      else if (liq >= 12000) liqSub = 18;
+      else if (liq >= 5000) liqSub = 10;
+      else liqSub = 0;
+
+      // 4. Alış / Satış & İşlem Akışı (0-25)
+      const totalTx = tx5m.buys + tx5m.sells;
+      if (totalTx >= 6) {
+        const buyRatio = tx5m.buys / totalTx;
+        if (buyRatio >= 0.58 && buyRatio <= 0.90) flowSub = 25;
+        else if (buyRatio > 0.90 && totalTx > 15) flowSub = 5; // Honeypot riski
+        else if (buyRatio >= 0.45) flowSub = 14;
+        else flowSub = 4;
+      } else {
+        flowSub = 8;
+      }
+
+      const totalScore = Math.min(100, Math.round(earlySub + momSub + liqSub + flowSub));
+
+      // Güvenlik & Risk Kontrolleri
+      const checks = [];
+      let redTriggered = false;
+      let rejectReason = "";
+
+      // Likidite kontrolü
+      if (liq < 4500) {
+        checks.push({ name: "Minimum Likidite", status: "RED", desc: `$${formatNumber(liq)} < $4,500 (Yüksek kayma ve likidite çekilme riski)` });
+        redTriggered = true;
+        rejectReason = "Kritik Düşük Likidite";
+      } else {
+        checks.push({ name: "Likidite Derinliği", status: "PASS", desc: `$${formatNumber(liq)} havuzda mevcut` });
+      }
+
+      // Satış yok (Honeypot)
+      if (tx5m.buys >= 10 && tx5m.sells === 0) {
+        checks.push({ name: "Çift Yönlü İşlem Akışı", status: "RED", desc: "Son 5 dakikada hiç satış gerçekleşmedi (Olası honeypot)." });
+        redTriggered = true;
+        rejectReason = "Satış Yok (Honeypot)";
+      } else {
+        checks.push({ name: "Çift Yönlü İşlem", status: "PASS", desc: `5d: ${tx5m.buys} Alış / ${tx5m.sells} Satış` });
+      }
+
+      // Mint Authority
+      if (sec.mintAuthority === 'ACTIVE') {
+        checks.push({ name: "Mint Yetkisi (Basım)", status: "RED", desc: "Mint yetkisi açık! Geliştirici token basıp satabilir." });
+        redTriggered = true;
+        rejectReason = "Mint Yetkisi Açık";
+      } else if (sec.mintAuthority === 'REVOKED') {
+        checks.push({ name: "Mint Yetkisi", status: "PASS", desc: "Mint yetkisi iptal edilmiş (Revoked)." });
+      } else {
+        checks.push({ name: "Mint Yetkisi", status: "UNKNOWN", desc: "Zincir üstü doğrulanamadı (Bilinmiyor)." });
+      }
+
+      // Freeze Authority
+      if (sec.freezeAuthority === 'ACTIVE') {
+        checks.push({ name: "Dondurma Yetkisi", status: "RED", desc: "Cüzdan dondurma yetkisi aktif!" });
+        redTriggered = true;
+        rejectReason = "Freeze Yetkisi Aktif";
+      } else if (sec.freezeAuthority === 'REVOKED') {
+        checks.push({ name: "Dondurma Yetkisi", status: "PASS", desc: "Freeze yetkisi iptal edilmiş (Revoked)." });
+      } else {
+        checks.push({ name: "Dondurma Yetkisi", status: "UNKNOWN", desc: "Dondurma yetkisi doğrulanamadı (Bilinmiyor)." });
+      }
+
+      // Holder Yoğunluğu
+      if (sec.topHolders === 'CONCENTRATED') {
+        checks.push({ name: "Holder Dağılımı", status: "RED", desc: "İlk cüzdanlarda yüksek token yoğunluğu." });
+      } else if (sec.topHolders === 'DISTRIBUTED') {
+        checks.push({ name: "Holder Dağılımı", status: "PASS", desc: "Cüzdan dağılımı dengeli." });
+      } else {
+        checks.push({ name: "Holder Dağılımı", status: "UNKNOWN", desc: "Cüzdan dağılımı bilinmiyor." });
+      }
+
+      // Durum Tespiti
+      let status = "WATCH";
+      if (redTriggered || totalScore < 40) {
+        status = "RED";
+      } else if (totalScore >= 70 && liq >= 10000) {
+        status = "CANDIDATE";
+      } else {
+        status = "WATCH";
+      }
+
+      // Kategori Uygunluğu
+      const isEarlyGem = (ageHours <= 12 && mcap <= 1200000 && liq >= 5000 && c5m < 250);
+      const isMomentum = (v5m >= 6000 && c5m > 0 && totalTx >= 12 && volGrowthRatio >= 1.2);
+
+      return {
+        totalScore,
+        subScores: { earlySub, momSub, liqSub, flowSub },
+        volGrowthRatio,
+        ageMinutes,
+        status,
+        rejectReason,
+        checks,
+        isEarlyGem,
+        isMomentum
+      };
+    }
+
+    /* =========================================================================
+       4. UI RENDERING & AXIOM ENTEGRASYONU
+       ========================================================================= */
+    function switchCategory(cat) {
+      currentCategory = cat;
+      document.getElementById('tabEarlyGems').classList.toggle('active', cat === 'early');
+      document.getElementById('tabMomentum').classList.toggle('active', cat === 'momentum');
+
+      const desc = document.getElementById('categoryDesc');
+      if (cat === 'early') {
+        desc.textContent = "Düşük market cap (<$1.2M), taze ve henüz büyük yükseliş yaşamamış tokenler.";
+      } else {
+        desc.textContent = "Son dakikalarda hacim artış oranı ve alıcı aktivitesi fırlayan coinler.";
+      }
+      renderPairs();
+    }
+
+    function handleSearch() {
+      renderPairs();
+    }
+
+    function renderPairs() {
+      const container = document.getElementById('tokenCardList');
+      const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+
+      if (!livePairs || livePairs.length === 0) {
+        container.innerHTML = '<div class="empty-state">Solana meme pariteleri aranıyor...</div>';
+        return;
+      }
+
+      let filtered = [];
+      if (currentCategory === 'early') {
+        // En iyi fırsatlar en üstte: Skoru yüksek ve yeni olanlar
+        filtered = livePairs
+          .filter(p => p.aiAnalysis && p.aiAnalysis.isEarlyGem)
+          .sort((a, b) => b.aiAnalysis.totalScore - a.aiAnalysis.totalScore);
+
+        if (filtered.length === 0) {
+          filtered = livePairs.slice().sort((a, b) => (b.pairCreatedAt || 0) - (a.pairCreatedAt || 0)).slice(0, 15);
+        }
+      } else {
+        // Momentum: Hacim büyüme oranına ve AI skoruna göre sıralı
+        filtered = livePairs
+          .filter(p => p.aiAnalysis && p.aiAnalysis.isMomentum)
+          .sort((a, b) => (b.aiAnalysis.volGrowthRatio * b.aiAnalysis.totalScore) - (a.aiAnalysis.volGrowthRatio * a.aiAnalysis.totalScore));
+
+        if (filtered.length === 0) {
+          filtered = livePairs.slice().sort((a, b) => (b.volume?.m5 || 0) - (a.volume?.m5 || 0)).slice(0, 15);
+        }
+      }
+
+      // Metin Arama Filtresi (Sembol, isim veya kontrat)
+      if (searchVal) {
+        filtered = filtered.filter(p => 
+          (p.targetToken.symbol && p.targetToken.symbol.toLowerCase().includes(searchVal)) ||
+          (p.targetToken.name && p.targetToken.name.toLowerCase().includes(searchVal)) ||
+          (p.targetToken.address && p.targetToken.address.toLowerCase().includes(searchVal))
+        );
+      }
+
+      document.getElementById('pairCountBadge').textContent = `${filtered.length} Fırsat`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state">Arama kriterlerine uygun fırsat bulunamadı.</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(p => createTokenCardHTML(p)).join('');
+    }
+
+    function createTokenCardHTML(p) {
+      const an = p.aiAnalysis;
+      const token = p.targetToken;
+      const mintAddress = token.address;
+      const isValidMint = isValidSolanaMint(mintAddress);
+
+      // Axiom Doğrudan İşlem URL'si
+      const axiomUrl = isValidMint ? `https://axiom.trade/meme/${mintAddress}` : '#';
+
+      const statusClass = an.status === 'CANDIDATE' ? 'badge-candidate' : (an.status === 'WATCH' ? 'badge-watch' : 'badge-red');
+      const statusText = an.status === 'CANDIDATE' ? 'ADAY' : (an.status === 'WATCH' ? 'İZLE' : 'RİSKLİ (RED)');
+
+      const ageText = p.pairCreatedAt ? formatAge(p.pairCreatedAt) : 'Bilinmiyor';
+      const c5m = p.priceChange && p.priceChange.m5 ? p.priceChange.m5 : 0;
+      const v5m = p.volume && p.volume.m5 ? p.volume.m5 : 0;
+      const v1h = p.volume && p.volume.h1 ? p.volume.h1 : 0;
+      const buys = p.txns && p.txns.m5 ? p.txns.m5.buys : 0;
+      const sells = p.txns && p.txns.m5 ? p.txns.m5.sells : 0;
+
+      const barColor = an.totalScore >= 70 ? 'var(--primary)' : (an.totalScore >= 45 ? 'var(--warning)' : 'var(--danger)');
+
+      return `
+        <div class="token-card">
+          <div class="token-top">
+            <div class="token-meta">
+              <div class="token-symbol-wrap">${escapeHtml((token.symbol || '?').substring(0, 4))}</div>
+              <div class="token-name-box">
+                <h3>${escapeHtml(token.symbol)} <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: normal;">/ SOL</span></h3>
+                <div class="token-age-tag">
+                  Yaş: <strong style="color: var(--accent);">${ageText}</strong> • <span class="mono">${shortAddress(mintAddress)}</span>
+                </div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <span class="status-badge ${statusClass}">${statusText}</span>
+              <div class="mono" style="font-size: 0.95rem; font-weight: 800; margin-top: 4px;">${formatPrice(p.priceUsd)}</div>
+            </div>
+          </div>
+
+          <!-- 4'lü Metrik Izgarası -->
+          <div class="metric-grid mono">
+            <div class="metric-item">
+              <div class="metric-lbl">Market Cap</div>
+              <div class="metric-val">$${formatNumber(p.fdv || p.marketCap || 0)}</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-lbl">Likidite</div>
+              <div class="metric-val">$${formatNumber(p.liquidity ? p.liquidity.usd : 0)}</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-lbl">5d Hacim</div>
+              <div class="metric-val">$${formatNumber(v5m)}</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-lbl">1s Hacim</div>
+              <div class="metric-val">$${formatNumber(v1h)}</div>
+            </div>
+          </div>
+
+          <!-- İşlem Hareketi & Skor Barı -->
+          <div class="score-bar-wrap" onclick="openScoreModal('${p.pairAddress}')">
+            <div class="score-text-row">
+              <span style="color: var(--text-muted);">AI Skoru: <strong style="color: ${barColor};">${an.totalScore}/100</strong> (İncele &rarr;)</span>
+              <span style="font-size: 0.68rem; color: ${c5m >= 0 ? 'var(--primary)' : 'var(--danger)'};">
+                5d: ${c5m >= 0 ? '+' : ''}${c5m}% • Al/Sat: ${buys}/${sells}
+              </span>
+            </div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: ${an.totalScore}%; background: ${barColor};"></div>
+            </div>
+          </div>
+
+          <!-- AXIOM'DA AÇ VE KONTRAT KOPYALA BUTONLARI -->
+          <div class="action-row">
+            ${isValidMint ? `
+              <a href="${axiomUrl}" target="_blank" rel="noopener noreferrer" class="btn-axiom">
+                <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                AXIOM’DA AÇ
+              </a>
+            ` : `
+              <button class="btn-axiom" style="opacity: 0.4; cursor: not-allowed;" disabled>
+                Geçersiz Mint
+              </button>
+            `}
+            <button class="btn-copy" onclick="copyContract('${mintAddress}')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+              Kopyala
+            </button>
+            <button class="btn-info" onclick="openScoreModal('${p.pairAddress}')" title="Detay">
+              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    /* Kontrat Kopyalama Fonksiyonu */
+    async function copyContract(mintAddress) {
+      if (!mintAddress || !isValidSolanaMint(mintAddress)) {
+        showToast("Geçersiz kontrat adresi!");
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(mintAddress);
+        showToast(`Kontrat kopyalandı: ${shortAddress(mintAddress)}`);
+      } catch (err) {
+        // Safari fallback
+        const ta = document.createElement('textarea');
+        ta.value = mintAddress;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast(`Kontrat kopyalandı!`);
+      }
+    }
+
+    /* Açıklanabilir Skor Modalı */
+    function openScoreModal(pairAddress) {
+      const p = livePairs.find(x => x.pairAddress === pairAddress);
+      if (!p) return;
+      const an = p.aiAnalysis;
+      const token = p.targetToken;
+
+      document.getElementById('modalTokenTitle').textContent = `${token.symbol} Detay Raporu`;
+
+      let html = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+          <span style="font-weight: 700;">AI Skoru:</span>
+          <span class="mono" style="font-size: 1.25rem; font-weight: 800; color: ${an.totalScore >= 70 ? 'var(--primary)' : 'var(--warning)'};">${an.totalScore} / 100</span>
+        </div>
+
+        <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">Puan Bileşenleri</div>
+        <div class="risk-row"><span>Erken Aşama & Düşük Cap:</span><span class="mono">${an.subScores.earlySub} / 25</span></div>
+        <div class="risk-row"><span>Momentum & Hacim İvmesi:</span><span class="mono">${an.subScores.momSub} / 25</span></div>
+        <div class="risk-row"><span>Likidite Havuz Derinliği:</span><span class="mono">${an.subScores.liqSub} / 25</span></div>
+        <div class="risk-row"><span>Alıcı / Satıcı Emir Dengesi:</span><span class="mono">${an.subScores.flowSub} / 25</span></div>
+
+        <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin: 12px 0 6px 0;">Güvenlik Kontrolleri (RugCheck)</div>
+      `;
+
+      an.checks.forEach(c => {
+        let tag = '';
+        if (c.status === 'PASS') tag = '<span style="color: var(--primary); font-weight: 700;">✔ GEÇTİ</span>';
+        else if (c.status === 'RED') tag = '<span style="color: var(--danger); font-weight: 700;">✖ RİSKLİ (RED)</span>';
+        else tag = '<span style="color: var(--warning); font-weight: 700;">⚠ BİLİNMİYOR</span>';
+
+        html += `
+          <div style="margin-bottom: 6px; padding: 6px 8px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.74rem;">
+              <span>${c.name}</span>
+              <span>${tag}</span>
+            </div>
+            <div style="color: var(--text-muted); font-size: 0.65rem; margin-top: 2px;">${c.desc}</div>
+          </div>
+        `;
+      });
+
+      document.getElementById('modalScoreBreakdown').innerHTML = html;
+
+      // Modal içi Axiom Butonu
+      const axiomUrl = `https://axiom.trade/meme/${token.address}`;
+      document.getElementById('modalAxiomContainer').innerHTML = `
+        <a href="${axiomUrl}" target="_blank" rel="noopener noreferrer" class="btn-axiom" style="width: 100%; padding: 12px;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+          BU COİNİ AXIOM'DA AÇ
+        </a>
+      `;
+
+      openModal('scoreModal');
+    }
+
+    /* =========================================================================
+       5. YARDIMCILAR & BAŞLATMA
+       ========================================================================= */
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2400);
+    }
+
+    function formatPrice(val) {
+      const num = parseFloat(val);
+      if (isNaN(num)) return '$0.00';
+      if (num < 0.000001) return '$' + num.toFixed(9);
+      if (num < 0.001) return '$' + num.toFixed(6);
+      if (num < 1) return '$' + num.toFixed(4);
+      return '$' + num.toFixed(2);
+    }
+
+    function formatNumber(val, decimals = 1) {
+      const num = parseFloat(val);
+      if (isNaN(num)) return '0';
+      if (num >= 1e6) return (num / 1e6).toFixed(decimals) + 'M';
+      if (num >= 1e3) return (num / 1e3).toFixed(decimals) + 'K';
+      return num.toFixed(decimals);
+    }
+
+    function formatAge(timestamp) {
+      const diffSec = Math.floor((Date.now() - timestamp) / 1000);
+      if (diffSec < 60) return `${diffSec}sn önce`;
+      if (diffSec < 3600) return `${Math.floor(diffSec / 60)}dk önce`;
+      return `${Math.floor(diffSec / 3600)}sa önce`;
+    }
+
+    function shortAddress(addr) {
+      if (!addr) return '';
+      return addr.slice(0, 4) + '...' + addr.slice(-4);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchSolanaRadar();
+
+      // 30 saniyelik otomatik tarama sayacı
+      refreshTimer = setInterval(() => {
+        countdownSec--;
+        const lbl = document.getElementById('countdownLabel');
+        if (lbl) lbl.textContent = countdownSec;
+        if (countdownSec <= 0) {
+          fetchSolanaRadar();
+        }
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
