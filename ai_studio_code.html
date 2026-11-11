@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#07090e" />
+  <title>MEME AI TRADER | Solana Simülasyon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #07090e;
+      --card-bg: rgba(17, 24, 39, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover: rgba(255, 255, 255, 0.12);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #10b981;
+      --primary-glow: rgba(16, 185, 129, 0.25);
+      --danger: #f43f5e;
+      --danger-glow: rgba(244, 63, 94, 0.25);
+      --warning: #f59e0b;
+      --warning-glow: rgba(245, 158, 11, 0.25);
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --safe-bottom: env(safe-area-inset-bottom, 16px);
+      --safe-top: env(safe-area-inset-top, 16px);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      padding-top: calc(var(--safe-top) + 8px);
+      padding-bottom: calc(var(--safe-bottom) + 76px);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* iOS Glassmorphism Container */
+    .app-container {
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* Üst Başlık & Paper Trading Rozeti */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-top: 4px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #10b981, #38bdf8);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #07090e;
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+    .brand-title {
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.5px;
+    }
+    .badge-sim {
+      font-size: 0.65rem;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: var(--warning);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Bakiye Özeti Kartı */
+    .balance-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .balance-card::before {
+      content: '';
+      position: absolute;
+      top: -30%;
+      right: -20%;
+      width: 150px;
+      height: 150px;
+      background: var(--primary-glow);
+      filter: blur(40px);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .balance-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .balance-val {
+      font-size: 1.9rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+    .pnl-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 10px;
+      font-size: 0.85rem;
+    }
+    .pnl-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-weight: 700;
+    }
+    .pnl-pos { background: rgba(16, 185, 129, 0.15); color: var(--primary); }
+    .pnl-neg { background: rgba(244, 63, 94, 0.15); color: var(--danger); }
+
+    /* Otomatik Bot Şeridi */
+    .bot-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      font-size: 0.8rem;
+    }
+    .bot-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #6b7280;
+    }
+    .dot.active {
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    /* iOS Tarzı Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #374151;
+      transition: .3s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    /* Sekmeler / Sayfalar */
+    .view-page {
+      display: none;
+      animation: fadeIn 0.2s ease-out forwards;
+    }
+    .view-page.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Canlı Tarayıcı Başlığı */
+    .scanner-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .sync-info {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .refresh-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .refresh-btn:active { background: rgba(255, 255, 255, 0.15); }
+    .refresh-btn.spinning svg {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* Token Kartları */
+    .token-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 12px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .token-card:active {
+      transform: scale(0.985);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .token-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .token-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .token-symbol-wrap {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--accent);
+    }
+    .token-name-box h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .token-age {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+    .status-badge {
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-candidate {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      color: var(--primary);
+    }
+    .badge-watch {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      color: var(--warning);
+    }
+    .badge-reject {
+      background: rgba(244, 63, 94, 0.2);
+      border: 1px solid rgba(244, 63, 94, 0.5);
+      color: var(--danger);
+    }
+
+    /* Skor ve Metrikler Tablosu */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 12px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    .metric-item {
+      text-align: center;
+    }
+    .metric-lbl {
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .metric-val {
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    /* AI Skor Barı */
+    .score-bar-wrap {
+      margin-bottom: 12px;
+    }
+    .score-text-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      margin-bottom: 4px;
+    }
+    .bar-bg {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    /* Butonlar */
+    .action-row {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-action {
+      flex: 1;
+      padding: 9px 0;
+      border-radius: 10px;
+      border: none;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: opacity 0.2s;
+    }
+    .btn-action:active { opacity: 0.8; }
+    .btn-buy { background: var(--primary); color: #052e16; }
+    .btn-details { background: rgba(255, 255, 255, 0.08); color: var(--text); }
+    .btn-sell { background: var(--danger); color: #fff; }
+
+    /* Modallar */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: var(--safe-bottom);
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-content {
+      width: 100%;
+      max-width: 520px;
+      background: #111827;
+      border: 1px solid var(--card-border);
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      padding: 22px 20px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+      animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .close-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--text-muted);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    /* Form ve Çipler */
+    .chip-group {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .chip {
+      flex: 1;
+      padding: 8px 0;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+    }
+    .chip.active {
+      border-color: var(--primary);
+      background: var(--primary-glow);
+      color: var(--primary);
+    }
+    .input-group {
+      margin-bottom: 14px;
+    }
+    .input-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: block;
+    }
+    .input-field {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+    }
+    .input-field:focus { border-color: var(--accent); }
+
+    /* Risk Detay Kutusu */
+    .risk-breakdown-box {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 12px;
+      margin: 12px 0;
+      font-size: 0.78rem;
+    }
+    .risk-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .risk-row:last-child { border-bottom: none; }
+
+    /* Portföy & Grafik */
+    .chart-container {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .chart-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    canvas {
+      width: 100% !important;
+      height: 140px !important;
+    }
+
+    /* Mobil Alt Navigasyon Barı */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 15, 24, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 10px calc(var(--safe-bottom) + 2px);
+      z-index: 90;
+    }
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 8px;
+      transition: color 0.2s;
+    }
+    .nav-btn.active {
+      color: var(--primary);
+    }
+    .nav-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.2;
+    }
+
+    /* Bildirim Çubuğu (Toast) */
+    .toast-msg {
+      position: fixed;
+      top: calc(var(--safe-top) + 10px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-30px);
+      background: #1f2937;
+      border: 1px solid var(--card-border);
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toast-msg.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 16px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Bildirim Kutusu -->
+  <div id="toast" class="toast-msg"></div>
+
+  <div class="app-container">
+    
+    <!-- Başlık & Paper Trading Uyarısı -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">M</div>
+        <div>
+          <div class="brand-title">MEME AI TRADER</div>
+        </div>
+      </div>
+      <span class="badge-sim">Paper Trading</span>
+    </header>
+
+    <!-- Portföy Bakiye Özeti -->
+    <section class="balance-card">
+      <div class="balance-sub">Toplam Portföy Değeri (USD)</div>
+      <div class="balance-val mono" id="totalPortfolioValue">$10,000.00</div>
+      <div class="pnl-row">
+        <span class="pnl-pill pnl-pos mono" id="totalPnlBadge">+0.00% ($0.00)</span>
+        <span style="color: var(--text-muted); font-size: 0.75rem;">Nakit: <span class="mono" id="cashBalance">$10,000.00</span></span>
+      </div>
+    </section>
+
+    <!-- Otomatik Bot Anahtarı -->
+    <section class="bot-strip">
+      <div class="bot-indicator">
+        <div class="dot" id="botDot"></div>
+        <div>
+          <strong style="font-size: 0.82rem;">Otomatik Al-Sat Motoru</strong>
+          <div style="font-size: 0.68rem; color: var(--text-muted);" id="botStatusText">Kapalı (Yalnızca Manuel)</div>
+        </div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="autoBotToggle" onchange="toggleAutoBot(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </section>
+
+    <!-- SAYFA 1: PANEL (DASHBOARD) -->
+    <main id="view-dashboard" class="view-page active">
+      <div class="chart-container">
+        <div class="chart-title">Sermaye Eğrisi (Equity Curve)</div>
+        <canvas id="equityCanvas"></canvas>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Öne Çıkan Adaylar</h4>
+        <span style="font-size: 0.7rem; color: var(--accent); cursor: pointer;" onclick="switchTab('scanner')">Tümünü Tara &rarr;</span>
+      </div>
+      <div id="dashboardCandidatesList"></div>
+    </main>
+
+    <!-- SAYFA 2: TARAYICI (SCANNER) -->
+    <main id="view-scanner" class="view-page">
+      <div class="scanner-controls">
+        <div class="sync-info">
+          <div><span style="color: var(--primary);">● Canlı DexScreener</span> (Solana)</div>
+          <div style="font-size: 0.65rem;" id="lastUpdatedLabel">Son güncelleme: --:--:--</div>
+        </div>
+        <button class="refresh-btn" id="refreshBtn" onclick="fetchLivePairs(true)">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          Yenile (<span id="countdownLabel">30</span>s)
+        </button>
+      </div>
+
+      <div id="scannerPairList">
+        <div class="empty-state">Solana meme coinleri taranıyor...</div>
+      </div>
+    </main>
+
+    <!-- SAYFA 3: PORTFÖY (PORTFOLIO) -->
+    <main id="view-portfolio" class="view-page">
+      <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted);">Açık Pozisyonlar</h4>
+        <span style="font-size: 0.75rem; color: var(--text-muted);" id="positionCountLabel">0 Pozisyon</span>
+      </div>
+      <div id="portfolioList">
+        <div class="empty-state">Henüz açık pozisyonunuz yok. Tarayıcıdan bir coin seçip alım yapabilirsiniz.</div>
+      </div>
+    </main>
+
+    <!-- SAYFA 4: İŞLEM GEÇMİŞİ (HISTORY) -->
+    <main id="view-history" class="view-page">
+      <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted);">İşlem Günlüğü</h4>
+        <span style="font-size: 0.75rem; color: var(--text-muted);" id="winRateLabel">Kazanma Oranı: %0</span>
+      </div>
+      <div id="tradeHistoryList">
+        <div class="empty-state">Henüz tamamlanan bir simülasyon işlemi yok.</div>
+      </div>
+    </main>
+
+    <!-- SAYFA 5: AYARLAR (SETTINGS) -->
+    <main id="view-settings" class="view-page">
+      <div class="balance-card">
+        <h4 style="margin-bottom: 12px; font-size: 0.95rem;">Risk & Simülasyon Parametreleri</h4>
+        
+        <div class="input-group">
+          <label class="input-label">Maksimum İşlem Tutarı (USD)</label>
+          <input type="number" class="input-field mono" id="cfgMaxPos" value="250" step="50" onchange="saveConfig()">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Zarar Durdur (Stop-Loss) %</label>
+          <input type="number" class="input-field mono" id="cfgStopLoss" value="12" step="1" onchange="saveConfig()">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Kâr Al (Take-Profit) %</label>
+          <input type="number" class="input-field mono" id="cfgTakeProfit" value="25" step="5" onchange="saveConfig()">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Otomatik Alım İçin Min. AI Skoru (0-100)</label>
+          <input type="number" class="input-field mono" id="cfgMinScore" value="70" min="50" max="95" onchange="saveConfig()">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Simüle Edilen DEX Komisyonu + Kayma (Slippage) %</label>
+          <input type="number" class="input-field mono" id="cfgFeeSlippage" value="1.3" step="0.1" onchange="saveConfig()">
+          <small style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-top: 4px;">%0.3 Raydium/DEX komisyonu + %1.0 tahmini slippage/öncelik ücreti simülasyonu.</small>
+        </div>
+
+        <button class="btn-action btn-sell" style="margin-top: 14px; width: 100%;" onclick="resetPortfolio()">
+          Tüm Verileri Sıfırla ($10.000 Başlangıç)
+        </button>
+      </div>
+
+      <div style="padding: 12px; font-size: 0.72rem; color: var(--text-muted); line-height: 1.5; background: rgba(0,0,0,0.25); border-radius: 14px;">
+        <strong>Şeffaflık & Veri Saklama Beyanı:</strong><br>
+        Bu prototip, verileri tarayıcınızın <code>localStorage</code> alanında saklar. Tarayıcı önbelleği silindiğinde sanal bakiye ve işlem geçmişi sıfırlanır. Çoklu cihaz senkronizasyonu için Supabase/PostgreSQL mimarisine taşınabilir.
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ALIM MODALI -->
+  <div id="buyModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="buyModalTitle">Kağıt Alım Yap</h3>
+        <button class="close-btn" onclick="closeModal('buyModal')">&times;</button>
+      </div>
+
+      <div style="font-size: 0.8rem; margin-bottom: 12px; color: var(--text-muted);">
+        Fiyat: <span class="mono" style="color: var(--text); font-weight: 700;" id="buyModalPrice">$0.00</span>
+      </div>
+
+      <div class="chip-group">
+        <div class="chip" onclick="setBuyAmount(100)">$100</div>
+        <div class="chip" onclick="setBuyAmount(250)">$250</div>
+        <div class="chip" onclick="setBuyAmount(500)">$500</div>
+        <div class="chip" onclick="setBuyAmountPercent(25)">%25 Nakit</div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Alım Tutarı (USD)</label>
+        <input type="number" id="buyAmountInput" class="input-field mono" value="250" oninput="calcBuySimulation()">
+      </div>
+
+      <div class="risk-breakdown-box">
+        <div class="risk-row">
+          <span>Tahmini Token Miktarı:</span>
+          <span class="mono" id="simTokenAmount">0</span>
+        </div>
+        <div class="risk-row">
+          <span>Simüle Komisyon + Slippage:</span>
+          <span class="mono" id="simFeeAmount">$0.00</span>
+        </div>
+        <div class="risk-row">
+          <span>Kalan Nakit Bakiye:</span>
+          <span class="mono" id="simRemainingCash">$0.00</span>
+        </div>
+      </div>
+
+      <button class="btn-action btn-buy" style="width: 100%; padding: 12px;" onclick="executePaperBuy()">
+        Onayla ve Simüle Alım Yap
+      </button>
+    </div>
+  </div>
+
+  <!-- SATIŞ MODALI -->
+  <div id="sellModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="sellModalTitle">Pozisyon Kapat / Sat</h3>
+        <button class="close-btn" onclick="closeModal('sellModal')">&times;</button>
+      </div>
+
+      <div class="risk-breakdown-box">
+        <div class="risk-row">
+          <span>Alış Fiyatı:</span>
+          <span class="mono" id="sellModalEntry">$0.00</span>
+        </div>
+        <div class="risk-row">
+          <span>Güncel Fiyat:</span>
+          <span class="mono" id="sellModalCurrent">$0.00</span>
+        </div>
+        <div class="risk-row">
+          <span>Tahmini K/Z (PnL):</span>
+          <span class="mono" id="sellModalPnL">$0.00 (0%)</span>
+        </div>
+      </div>
+
+      <div class="chip-group">
+        <div class="chip active" onclick="setSellRatio(1.0)">%100 (Tümü)</div>
+        <div class="chip" onclick="setSellRatio(0.5)">%50 (Yarısı)</div>
+      </div>
+
+      <button class="btn-action btn-sell" style="width: 100%; padding: 12px;" onclick="executePaperSell()">
+        Satışı Simüle Et ve Nakde Geç
+      </button>
+    </div>
+  </div>
+
+  <!-- AÇIKLANABİLİR AI SKOR & RİSK DETAY MODALI -->
+  <div id="scoreDetailModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="scoreDetailTitle">AI Analiz & Risk Şeffaflığı</h3>
+        <button class="close-btn" onclick="closeModal('scoreDetailModal')">&times;</button>
+      </div>
+
+      <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;">
+        Puanlama sistemi uydurma güvenlik verisi göstermez. Yalnızca DexScreener halka açık zincir verileriyle matematiksel olarak teyit edilebilen faktörleri değerlendirir.
+      </div>
+
+      <div class="risk-breakdown-box" id="scoreBreakdownContent"></div>
+
+      <button class="btn-action btn-details" style="width: 100%;" onclick="closeModal('scoreDetailModal')">
+        Kapat
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobil Alt Navigasyon -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="switchTab('dashboard')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+      Panel
+    </button>
+    <button class="nav-btn" onclick="switchTab('scanner')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      Tarayıcı
+    </button>
+    <button class="nav-btn" onclick="switchTab('portfolio')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+      Portföy
+    </button>
+    <button class="nav-btn" onclick="switchTab('history')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      Geçmiş
+    </button>
+    <button class="nav-btn" onclick="switchTab('settings')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+      Ayarlar
+    </button>
+  </nav>
+
+  <script>
+    /* =========================================================
+       SİSTEM DURUMU & VERİ DEPOLAMA (STATE & PERSISTENCE)
+       ========================================================= */
+    const DEFAULT_STATE = {
+      cash: 10000.0,
+      positions: [],      // { pairAddress, symbol, name, buyPrice, tokensCount, investedUsd, timestamp }
+      history: [],        // { pairAddress, symbol, type, price, pnlUsd, pnlPercent, timestamp, reason }
+      equityHistory: [10000.0],
+      autoBot: false,
+      config: {
+        maxPosUsd: 250,
+        stopLossPercent: 12,
+        takeProfitPercent: 25,
+        minScoreToBuy: 70,
+        feeSlippagePercent: 1.3
+      }
+    };
+
+    let state = loadState();
+    let livePairs = [];
+    let countdownSec = 30;
+    let refreshInterval = null;
+    let currentSelectedPair = null;
+    let currentSellPositionIndex = null;
+    let sellFraction = 1.0;
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem('MEME_AI_TRADER_STATE');
+        return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_STATE));
+      } catch (e) {
+        console.warn('LocalStorage okunamadı, varsayılan yüklendi', e);
+        return JSON.parse(JSON.stringify(DEFAULT_STATE));
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem('MEME_AI_TRADER_STATE', JSON.stringify(state));
+      } catch (e) {
+        console.error('LocalStorage kaydetme hatası:', e);
+      }
+      updateUI();
+    }
+
+    function resetPortfolio() {
+      if (confirm("Tüm sanal portföyü ve işlem geçmişini sıfırlayıp $10.000 bakiyeye dönmek istiyor musunuz?")) {
+        state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+        saveState();
+        showToast("Portföy $10.000 olarak sıfırlandı.");
+        renderPortfolio();
+        renderHistory();
+        drawEquityChart();
+      }
+    }
+
+    function saveConfig() {
+      state.config.maxPosUsd = parseFloat(document.getElementById('cfgMaxPos').value) || 250;
+      state.config.stopLossPercent = parseFloat(document.getElementById('cfgStopLoss').value) || 12;
+      state.config.takeProfitPercent = parseFloat(document.getElementById('cfgTakeProfit').value) || 25;
+      state.config.minScoreToBuy = parseFloat(document.getElementById('cfgMinScore').value) || 70;
+      state.config.feeSlippagePercent = parseFloat(document.getElementById('cfgFeeSlippage').value) || 1.3;
+      saveState();
+      showToast("Ayarlar kaydedildi.");
+    }
+
+    /* =========================================================
+       DEXSCREENER CANLI SOLANA MEME VERİ ÇEKİCİ (SCANNER)
+       ========================================================= */
+    async function fetchLivePairs(isManual = false) {
+      const btn = document.getElementById('refreshBtn');
+      if (btn) btn.classList.add('spinning');
+
+      try {
+        // DexScreener halka açık arama uç noktaları (Solana ekosistemi ve pump pariteleri)
+        const [res1, res2] = await Promise.allSettled([
+          fetch('https://api.dexscreener.com/latest/dex/search?q=solana'),
+          fetch('https://api.dexscreener.com/latest/dex/search?q=pump')
+        ]);
+
+        let rawPairs = [];
+        if (res1.status === 'fulfilled' && res1.value.ok) {
+          const d1 = await res1.value.json();
+          if (d1.pairs) rawPairs.push(...d1.pairs);
+        }
+        if (res2.status === 'fulfilled' && res2.value.ok) {
+          const d2 = await res2.value.json();
+          if (d2.pairs) rawPairs.push(...d2.pairs);
+        }
+
+        // Solana zincirini filtrele & pairAddress bazlı tekilleştir (Deduplicate)
+        const map = new Map();
+        for (const p of rawPairs) {
+          if (p.chainId === 'solana' && p.pairAddress && !map.has(p.pairAddress)) {
+            // Analiz puanı ve risk hesapla
+            p.aiAnalysis = evaluatePair(p);
+            map.set(p.pairAddress, p);
+          }
+        }
+
+        livePairs = Array.from(map.values()).sort((a, b) => b.aiAnalysis.totalScore - a.aiAnalysis.totalScore);
+
+        document.getElementById('lastUpdatedLabel').textContent = 
+          'Son güncelleme: ' + new Date().toLocaleTimeString('tr-TR');
+
+        renderScanner();
+        renderDashboardCandidates();
+        checkOpenPositionsLivePrice();
+
+        // Eğer otomatik bot devredeyse adayları değerlendir
+        if (state.autoBot) {
+          runAutoBotTick();
+        }
+
+        if (isManual) showToast("Canlı Solana verileri güncellendi");
+      } catch (err) {
+        console.error("DexScreener API Hatası:", err);
+        showToast("API bağlantı hatası veya oran limiti. Yeniden denenecek.");
+      } finally {
+        if (btn) btn.classList.remove('spinning');
+        countdownSec = 30;
+      }
+    }
+
+    /* =========================================================
+       AÇIKLANABİLİR 0-100 AI SKORLAMA & RİSK KONTROL MOTORU
+       ========================================================= */
+    function evaluatePair(p) {
+      let liqScore = 0;
+      let momScore = 0;
+      let volScore = 0;
+      let buyActScore = 0;
+
+      const liq = p.liquidity ? (p.liquidity.usd || 0) : 0;
+      const v5m = p.volume ? (p.volume.m5 || 0) : 0;
+      const v1h = p.volume ? (p.volume.h1 || 0) : 0;
+      const c5m = p.priceChange ? (p.priceChange.m5 || 0) : 0;
+      const c1h = p.priceChange ? (p.priceChange.h1 || 0) : 0;
+      const txns5m = p.txns && p.txns.m5 ? p.txns.m5 : { buys: 0, sells: 0 };
+
+      // 1. Likidite Puanı (0 - 25)
+      if (liq >= 100000) liqScore = 25;
+      else if (liq >= 50000) liqScore = 20;
+      else if (liq >= 20000) liqScore = 14;
+      else if (liq >= 5000) liqScore = 8;
+      else liqScore = 0; // Aşırı düşük likidite risklidir
+
+      // 2. Momentum Puanı (0 - 25) (Pozitif ivme, aşırı dump/pump kontrolü)
+      if (c5m > 0 && c5m <= 150) momScore += 15;
+      else if (c5m > 150) momScore += 8; // Aşırı fırlama (riskli tepe)
+      else if (c5m > -10) momScore += 5;
+
+      if (c1h > 0 && c1h <= 300) momScore += 10;
+      else if (c1h > -15) momScore += 4;
+      momScore = Math.min(25, momScore);
+
+      // 3. Hacim Puanı (0 - 25)
+      if (v5m >= 25000 || v1h >= 100000) volScore = 25;
+      else if (v5m >= 10000 || v1h >= 40000) volScore = 18;
+      else if (v5m >= 2000) volScore = 10;
+      else volScore = 3;
+
+      // 4. Alıcı / Satıcı Aktivitesi (0 - 25)
+      const totalTx = txns5m.buys + txns5m.sells;
+      if (totalTx > 10) {
+        const buyRatio = txns5m.buys / totalTx;
+        if (buyRatio >= 0.60 && buyRatio <= 0.95) buyActScore = 25; // Sağlıklı birikim
+        else if (buyRatio > 0.95 && totalTx > 30) buyActScore = 5;  // Honeypot şüphesi (satış yok)
+        else if (buyRatio >= 0.45) buyActScore = 15;
+        else buyActScore = 5; // Yoğun panik satışı
+      } else {
+        buyActScore = 8;
+      }
+
+      const totalScore = Math.round(liqScore + momScore + volScore + buyActScore);
+
+      // Doğrulanabilir Risk Kontrolleri (Uydurma güvenlik verisi içermez)
+      const riskChecks = [];
+      let rejectTriggered = false;
+
+      // Risk 1: Minimum Likidite Kontrolü
+      if (liq < 5000) {
+        riskChecks.push({ title: "Kritik Düşük Likidite", safe: false, desc: `$${formatNumber(liq)} < $5,000 eşiği (Yüksek kayma riski)` });
+        rejectTriggered = true;
+      } else {
+        riskChecks.push({ title: "Likidite Derinliği", safe: true, desc: `$${formatNumber(liq)} DEX havuzunda kilitli/mevcut` });
+      }
+
+      // Risk 2: Alış/Satış Honeypot Tespiti
+      if (txns5m.buys >= 15 && txns5m.sells === 0) {
+        riskChecks.push({ title: "Potansiyel Honeypot / Satış Engeli", safe: false, desc: "Son 5 dakikada 0 satış işlemi kaydedildi." });
+        rejectTriggered = true;
+      } else {
+        riskChecks.push({ title: "İki Yönlü İşlem Akışı", safe: true, desc: `5dk: ${txns5m.buys} Alış / ${txns5m.sells} Satış doğrulanıyor` });
+      }
+
+      // Risk 3: Sözleşme Denetimi Uyarısı (Şeffaflık)
+      riskChecks.push({
+        title: "Sözleşme İçi Yetki (Mint/Freeze)",
+        safe: null, // Bilinmiyor
+        desc: "DexScreener açık verisiyle mint/dondurma yetkisi doğrulanamaz. Güvenli varsayılmaz (Bilinmiyor)."
+      });
+
+      // Durum Kararı (CANDIDATE, WATCH, REJECT)
+      let status = "WATCH";
+      if (rejectTriggered || totalScore < 45) {
+        status = "REJECT";
+      } else if (totalScore >= 70 && liq >= 15000) {
+        status = "CANDIDATE";
+      } else {
+        status = "WATCH";
+      }
+
+      return {
+        totalScore,
+        subScores: { liqScore, momScore, volScore, buyActScore },
+        riskChecks,
+        status
+      };
+    }
+
+    /* =========================================================
+       SANAL ALIM-SATIM & OTOMATİK BOT MOTORU
+       ========================================================= */
+    function openBuyModal(pairAddress) {
+      const p = livePairs.find(x => x.pairAddress === pairAddress);
+      if (!p) return;
+      currentSelectedPair = p;
+
+      document.getElementById('buyModalTitle').textContent = `${p.baseToken.symbol} Sanal Al`;
+      document.getElementById('buyModalPrice').textContent = formatPrice(p.priceUsd);
+      document.getElementById('buyAmountInput').value = Math.min(state.config.maxPosUsd, state.cash).toFixed(0);
+      calcBuySimulation();
+      openModal('buyModal');
+    }
+
+    function setBuyAmount(amt) {
+      document.getElementById('buyAmountInput').value = amt;
+      calcBuySimulation();
+    }
+
+    function setBuyAmountPercent(pct) {
+      const amt = (state.cash * (pct / 100)).toFixed(0);
+      document.getElementById('buyAmountInput').value = amt;
+      calcBuySimulation();
+    }
+
+    function calcBuySimulation() {
+      if (!currentSelectedPair) return;
+      const amtUsd = parseFloat(document.getElementById('buyAmountInput').value) || 0;
+      const price = parseFloat(currentSelectedPair.priceUsd) || 0.00000001;
+      const feeRate = (state.config.feeSlippagePercent || 1.3) / 100;
+
+      const fee = amtUsd * feeRate;
+      const netInvest = Math.max(0, amtUsd - fee);
+      const tokens = netInvest / price;
+
+      document.getElementById('simTokenAmount').textContent = formatNumber(tokens, 2);
+      document.getElementById('simFeeAmount').textContent = `$${fee.toFixed(2)} (%${state.config.feeSlippagePercent})`;
+      document.getElementById('simRemainingCash').textContent = `$${Math.max(0, state.cash - amtUsd).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    }
+
+    function executePaperBuy(pairOverride = null, amountOverride = null, isAuto = false) {
+      const p = pairOverride || currentSelectedPair;
+      if (!p) return;
+
+      const amtUsd = amountOverride !== null ? amountOverride : parseFloat(document.getElementById('buyAmountInput').value);
+      if (!amtUsd || amtUsd <= 0) {
+        showToast("Geçersiz alım tutarı");
+        return;
+      }
+      if (amtUsd > state.cash) {
+        showToast("Yetersiz sanal bakiye!");
+        return;
+      }
+
+      const price = parseFloat(p.priceUsd) || 0.00000001;
+      const fee = amtUsd * (state.config.feeSlippagePercent / 100);
+      const netInvest = amtUsd - fee;
+      const tokensCount = netInvest / price;
+
+      state.cash -= amtUsd;
+      state.positions.push({
+        pairAddress: p.pairAddress,
+        symbol: p.baseToken.symbol,
+        name: p.baseToken.name,
+        buyPrice: price,
+        tokensCount: tokensCount,
+        investedUsd: amtUsd,
+        timestamp: Date.now()
+      });
+
+      state.history.unshift({
+        pairAddress: p.pairAddress,
+        symbol: p.baseToken.symbol,
+        type: isAuto ? 'OTO-AL' : 'ALIM',
+        price: price,
+        amountUsd: amtUsd,
+        feeUsd: fee,
+        pnlUsd: 0,
+        pnlPercent: 0,
+        timestamp: Date.now(),
+        reason: isAuto ? 'AI Skor Kriteri Karşılandı' : 'Manuel Kullanıcı Emri'
+      });
+
+      closeModal('buyModal');
+      saveState();
+      showToast(`Alım Yapıldı: $${amtUsd.toFixed(2)} -> ${p.baseToken.symbol}`);
+    }
+
+    function openSellModal(index) {
+      const pos = state.positions[index];
+      if (!pos) return;
+      currentSellPositionIndex = index;
+      sellFraction = 1.0;
+
+      // Güncel fiyata bak
+      const live = livePairs.find(x => x.pairAddress === pos.pairAddress);
+      const currentPrice = live ? parseFloat(live.priceUsd) : pos.buyPrice;
+      const currentVal = pos.tokensCount * currentPrice;
+      const pnlUsd = currentVal - pos.investedUsd;
+      const pnlPct = (pnlUsd / pos.investedUsd) * 100;
+
+      document.getElementById('sellModalTitle').textContent = `${pos.symbol} Satış`;
+      document.getElementById('sellModalEntry').textContent = formatPrice(pos.buyPrice);
+      document.getElementById('sellModalCurrent').textContent = formatPrice(currentPrice);
+      
+      const pnlEl = document.getElementById('sellModalPnL');
+      pnlEl.textContent = `${pnlUsd >= 0 ? '+' : ''}$${pnlUsd.toFixed(2)} (${pnlPct.toFixed(2)}%)`;
+      pnlEl.style.color = pnlUsd >= 0 ? 'var(--primary)' : 'var(--danger)';
+
+      openModal('sellModal');
+    }
+
+    function setSellRatio(fraction) {
+      sellFraction = fraction;
+      document.querySelectorAll('#sellModal .chip').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function executePaperSell(indexOverride = null, isAuto = false, autoReason = '') {
+      const idx = indexOverride !== null ? indexOverride : currentSellPositionIndex;
+      const pos = state.positions[idx];
+      if (!pos) return;
+
+      const live = livePairs.find(x => x.pairAddress === pos.pairAddress);
+      const curPrice = live ? parseFloat(live.priceUsd) : pos.buyPrice;
+
+      const tokenPortion = pos.tokensCount * sellFraction;
+      const grossReturn = tokenPortion * curPrice;
+      const fee = grossReturn * (state.config.feeSlippagePercent / 100);
+      const netReturn = grossReturn - fee;
+
+      const investedPortion = pos.investedUsd * sellFraction;
+      const pnlUsd = netReturn - investedPortion;
+      const pnlPct = (pnlUsd / investedPortion) * 100;
+
+      state.cash += netReturn;
+
+      state.history.unshift({
+        pairAddress: pos.pairAddress,
+        symbol: pos.symbol,
+        type: isAuto ? 'OTO-SAT' : 'SATIŞ',
+        price: curPrice,
+        amountUsd: netReturn,
+        feeUsd: fee,
+        pnlUsd: pnlUsd,
+        pnlPercent: pnlPct,
+        timestamp: Date.now(),
+        reason: isAuto ? autoReason : 'Manuel Satış'
+      });
+
+      if (sellFraction >= 0.999) {
+        state.positions.splice(idx, 1);
+      } else {
+        pos.tokensCount -= tokenPortion;
+        pos.investedUsd -= investedPortion;
+      }
+
+      closeModal('sellModal');
+      saveState();
+      showToast(`Satıldı: ${pos.symbol} (${pnlUsd >= 0 ? '+' : ''}$${pnlUsd.toFixed(2)})`);
+    }
+
+    /* Otomatik Bot Döngüsü (Tick) */
+    function toggleAutoBot(checked) {
+      state.autoBot = checked;
+      document.getElementById('botDot').className = 'dot ' + (checked ? 'active' : '');
+      document.getElementById('botStatusText').textContent = checked 
+        ? `Aktif (Adayları Otonom Tarar ve Pozisyonları Yönetir)`
+        : 'Kapalı (Yalnızca Manuel)';
+      saveState();
+      showToast(checked ? "Otomatik Bot Başlatıldı" : "Otomatik Bot Durduruldu");
+      if (checked) runAutoBotTick();
+    }
+
+    function runAutoBotTick() {
+      if (!state.autoBot) return;
+
+      // 1. Pozisyonları TP/SL kontrol et
+      for (let i = state.positions.length - 1; i >= 0; i--) {
+        const pos = state.positions[i];
+        const live = livePairs.find(x => x.pairAddress === pos.pairAddress);
+        if (!live) continue;
+        const curPrice = parseFloat(live.priceUsd);
+        const pnlPct = ((curPrice - pos.buyPrice) / pos.buyPrice) * 100;
+
+        if (pnlPct <= -Math.abs(state.config.stopLossPercent)) {
+          sellFraction = 1.0;
+          executePaperSell(i, true, `Zarar Durdur (SL -%${Math.abs(pnlPct).toFixed(1)})`);
+        } else if (pnlPct >= state.config.takeProfitPercent) {
+          sellFraction = 1.0;
+          executePaperSell(i, true, `Kâr Al (TP +%${pnlPct.toFixed(1)})`);
+        }
+      }
+
+      // 2. Yeni Aday (CANDIDATE) varsa ve bakiye yetiyorsa otomatik alım yap
+      const candidate = livePairs.find(p => 
+        p.aiAnalysis.status === 'CANDIDATE' &&
+        p.aiAnalysis.totalScore >= state.config.minScoreToBuy &&
+        !state.positions.some(pos => pos.pairAddress === p.pairAddress)
+      );
+
+      if (candidate && state.cash >= state.config.maxPosUsd) {
+        executePaperBuy(candidate, state.config.maxPosUsd, true);
+      }
+    }
+
+    /* =========================================================
+       GÜNCEL FİYAT VE PORTFÖY DEĞER HESAPLAMASI
+       ========================================================= */
+    function checkOpenPositionsLivePrice() {
+      let openPositionsVal = 0;
+      state.positions.forEach(pos => {
+        const live = livePairs.find(p => p.pairAddress === pos.pairAddress);
+        const price = live ? parseFloat(live.priceUsd) : pos.buyPrice;
+        openPositionsVal += (pos.tokensCount * price);
+      });
+
+      const totalEquity = state.cash + openPositionsVal;
+      const initialBal = 10000.0;
+      const totalPnlUsd = totalEquity - initialBal;
+      const totalPnlPct = ((totalPnlUsd / initialBal) * 100);
+
+      document.getElementById('totalPortfolioValue').textContent = `$${totalEquity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('cashBalance').textContent = `$${state.cash.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      const badge = document.getElementById('totalPnlBadge');
+      badge.className = 'pnl-pill mono ' + (totalPnlUsd >= 0 ? 'pnl-pos' : 'pnl-neg');
+      badge.textContent = `${totalPnlUsd >= 0 ? '+' : ''}${totalPnlPct.toFixed(2)}% (${totalPnlUsd >= 0 ? '+' : ''}$${totalPnlUsd.toFixed(2)})`;
+
+      // Sermaye eğrisine yeni nokta kaydet (maksimum 40 nokta)
+      if (state.equityHistory.length === 0 || Math.abs(state.equityHistory[state.equityHistory.length - 1] - totalEquity) > 0.05) {
+        state.equityHistory.push(totalEquity);
+        if (state.equityHistory.length > 40) state.equityHistory.shift();
+      }
+
+      drawEquityChart();
+      renderPortfolio();
+    }
+
+    /* =========================================================
+       CANVAS SERMAYE EĞRİSİ ÇİZİCİ (EQUITY CURVE)
+       ========================================================= */
+    function drawEquityChart() {
+      const cvs = document.getElementById('equityCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      const w = cvs.clientWidth * window.devicePixelRatio;
+      const h = cvs.clientHeight * window.devicePixelRatio;
+      cvs.width = w;
+      cvs.height = h;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const pts = state.equityHistory;
+      if (pts.length < 2) return;
+
+      const min = Math.min(...pts) * 0.998;
+      const max = Math.max(...pts) * 1.002;
+      const range = max - min || 1;
+
+      const step = w / (pts.length - 1);
+
+      ctx.beginPath();
+      pts.forEach((pt, i) => {
+        const x = i * step;
+        const y = h - ((pt - min) / range) * (h - 20) - 10;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      const isUp = pts[pts.length - 1] >= pts[0];
+      ctx.strokeStyle = isUp ? '#10b981' : '#f43f5e';
+      ctx.lineWidth = 2.5 * window.devicePixelRatio;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      // Gradyan dolgu
+      ctx.lineTo(w, h);
+      ctx.lineTo(0, h);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, isUp ? 'rgba(16, 185, 129, 0.25)' : 'rgba(244, 63, 94, 0.25)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+
+    /* =========================================================
+       UI RENDERING & BİLEŞENLER
+       ========================================================= */
+    function renderScanner() {
+      const container = document.getElementById('scannerPairList');
+      if (!livePairs || livePairs.length === 0) {
+        container.innerHTML = '<div class="empty-state">Solana meme çifti bulunamadı.</div>';
+        return;
+      }
+
+      container.innerHTML = livePairs.map(p => createTokenCardHTML(p)).join('');
+    }
+
+    function renderDashboardCandidates() {
+      const container = document.getElementById('dashboardCandidatesList');
+      const candidates = livePairs.filter(p => p.aiAnalysis.status === 'CANDIDATE' || p.aiAnalysis.totalScore >= 60).slice(0, 4);
+
+      if (candidates.length === 0) {
+        container.innerHTML = '<div class="empty-state">Şu an kriterleri karşılayan yüksek puanlı aday yok.</div>';
+        return;
+      }
+      container.innerHTML = candidates.map(p => createTokenCardHTML(p)).join('');
+    }
+
+    function createTokenCardHTML(p) {
+      const an = p.aiAnalysis;
+      const statusClass = an.status === 'CANDIDATE' ? 'badge-candidate' : (an.status === 'WATCH' ? 'badge-watch' : 'badge-reject');
+      const statusText = an.status === 'CANDIDATE' ? 'ADAY' : (an.status === 'WATCH' ? 'İZLE' : 'RET');
+
+      const ageText = p.pairCreatedAt ? formatAge(p.pairCreatedAt) : 'Bilinmiyor';
+      const c5m = p.priceChange && p.priceChange.m5 ? p.priceChange.m5 : 0;
+      const c1h = p.priceChange && p.priceChange.h1 ? p.priceChange.h1 : 0;
+      const buys = p.txns && p.txns.m5 ? p.txns.m5.buys : 0;
+      const sells = p.txns && p.txns.m5 ? p.txns.m5.sells : 0;
+
+      const barColor = an.totalScore >= 70 ? 'var(--primary)' : (an.totalScore >= 45 ? 'var(--warning)' : 'var(--danger)');
+
+      return `
+        <div class="token-card">
+          <div class="token-top">
+            <div class="token-meta">
+              <div class="token-symbol-wrap">${(p.baseToken.symbol || '?').substring(0, 3)}</div>
+              <div class="token-name-box">
+                <h3>${escapeHtml(p.baseToken.symbol)} <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: normal;">/ SOL</span></h3>
+                <div class="token-age">Yaş: ${ageText} • <span class="mono" style="color: var(--accent);">${shortAddress(p.pairAddress)}</span></div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <span class="status-badge ${statusClass}">${statusText}</span>
+              <div class="mono" style="font-size: 0.95rem; font-weight: 800; margin-top: 4px;">${formatPrice(p.priceUsd)}</div>
+            </div>
+          </div>
+
+          <div class="metric-grid mono">
+            <div class="metric-item">
+              <div class="metric-lbl">Likidite</div>
+              <div class="metric-val">$${formatNumber(p.liquidity ? p.liquidity.usd : 0)}</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-lbl">P. Değeri</div>
+              <div class="metric-val">$${formatNumber(p.fdv || p.marketCap || 0)}</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-lbl">5d Değişim</div>
+              <div class="metric-val" style="color: ${c5m >= 0 ? 'var(--primary)' : 'var(--danger)'};">${c5m >= 0 ? '+' : ''}${c5m}%</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-lbl">5d Al/Sat</div>
+              <div class="metric-val">${buys}/${sells}</div>
+            </div>
+          </div>
+
+          <div class="score-bar-wrap" onclick="openScoreDetailModal('${p.pairAddress}')" style="cursor: pointer;">
+            <div class="score-text-row">
+              <span style="color: var(--text-muted);">AI Skoru: <strong style="color: ${barColor};">${an.totalScore}/100</strong> (İncele &rarr;)</span>
+              <span style="font-size: 0.65rem; color: var(--accent);">Likidite: ${an.subScores.liqScore}/25 • Momentum: ${an.subScores.momScore}/25</span>
+            </div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: ${an.totalScore}%; background: ${barColor};"></div>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="btn-action btn-buy" onclick="openBuyModal('${p.pairAddress}')">
+              Sanal Al
+            </button>
+            <button class="btn-action btn-details" onclick="openScoreDetailModal('${p.pairAddress}')">
+              Risk Denetimi
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPortfolio() {
+      const container = document.getElementById('portfolioList');
+      document.getElementById('positionCountLabel').textContent = `${state.positions.length} Pozisyon`;
+
+      if (state.positions.length === 0) {
+        container.innerHTML = '<div class="empty-state">Açık bir kağıt pozisyonunuz bulunmamaktadır.</div>';
+        return;
+      }
+
+      container.innerHTML = state.positions.map((pos, idx) => {
+        const live = livePairs.find(x => x.pairAddress === pos.pairAddress);
+        const curPrice = live ? parseFloat(live.priceUsd) : pos.buyPrice;
+        const curVal = pos.tokensCount * curPrice;
+        const pnlUsd = curVal - pos.investedUsd;
+        const pnlPct = (pnlUsd / pos.investedUsd) * 100;
+        const isProfit = pnlUsd >= 0;
+
+        return `
+          <div class="token-card">
+            <div class="token-top">
+              <div>
+                <h3 style="font-size: 1rem; font-weight: 700;">${pos.symbol}</h3>
+                <div style="font-size: 0.7rem; color: var(--text-muted);">Yatırılan: $${pos.investedUsd.toFixed(2)}</div>
+              </div>
+              <div style="text-align: right;">
+                <div class="mono" style="font-size: 0.95rem; font-weight: 700;">$${curVal.toFixed(2)}</div>
+                <div class="mono" style="font-size: 0.78rem; font-weight: 700; color: ${isProfit ? 'var(--primary)' : 'var(--danger)'};">
+                  ${isProfit ? '+' : ''}$${pnlUsd.toFixed(2)} (${isProfit ? '+' : ''}${pnlPct.toFixed(2)}%)
+                </div>
+              </div>
+            </div>
+
+            <div class="metric-grid mono">
+              <div class="metric-item">
+                <div class="metric-lbl">Giriş Fiyatı</div>
+                <div class="metric-val">${formatPrice(pos.buyPrice)}</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-lbl">Güncel Fiyat</div>
+                <div class="metric-val">${formatPrice(curPrice)}</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-lbl">Token Adedi</div>
+                <div class="metric-val">${formatNumber(pos.tokensCount, 1)}</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-lbl">Kâr Al / Durdur</div>
+                <div class="metric-val">+%${state.config.takeProfitPercent} / -%${state.config.stopLossPercent}</div>
+              </div>
+            </div>
+
+            <button class="btn-action btn-sell" style="width: 100%;" onclick="openSellModal(${idx})">
+              Pozisyonu Kapat (Satış)
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('tradeHistoryList');
+      if (state.history.length === 0) {
+        container.innerHTML = '<div class="empty-state">İşlem geçmişi bulunmuyor.</div>';
+        return;
+      }
+
+      // Kazanma Oranı (Win Rate)
+      const sellTrades = state.history.filter(h => h.type.includes('SAT'));
+      const wins = sellTrades.filter(h => h.pnlUsd > 0).length;
+      const winRate = sellTrades.length > 0 ? ((wins / sellTrades.length) * 100).toFixed(0) : 0;
+      document.getElementById('winRateLabel').textContent = `Kazanma Oranı: %${winRate} (${wins}/${sellTrades.length})`;
+
+      container.innerHTML = state.history.map(item => {
+        const isSell = item.type.includes('SAT');
+        const isWin = item.pnlUsd >= 0;
+        return `
+          <div class="token-card" style="padding: 12px; margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <div>
+                <span class="status-badge ${item.type.includes('AL') ? 'badge-candidate' : 'badge-reject'}" style="font-size: 0.6rem;">${item.type}</span>
+                <strong style="margin-left: 6px; font-size: 0.88rem;">${item.symbol}</strong>
+              </div>
+              <div class="mono" style="font-size: 0.8rem; color: var(--text-muted);">
+                ${new Date(item.timestamp).toLocaleTimeString('tr-TR')}
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
+              <span>Tutar: $${item.amountUsd.toFixed(2)} • ${item.reason}</span>
+              ${isSell ? `<span class="mono" style="color: ${isWin ? 'var(--primary)' : 'var(--danger)'}; font-weight: 700;">${isWin ? '+' : ''}$${item.pnlUsd.toFixed(2)} (${item.pnlPercent.toFixed(1)}%)</span>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openScoreDetailModal(pairAddress) {
+      const p = livePairs.find(x => x.pairAddress === pairAddress);
+      if (!p) return;
+      const an = p.aiAnalysis;
+
+      document.getElementById('scoreDetailTitle').textContent = `${p.baseToken.symbol} AI & Risk Puanı`;
+
+      let html = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+          <span style="font-weight: 700;">Toplam Şeffaf Skor:</span>
+          <span class="mono" style="font-size: 1.2rem; font-weight: 800; color: ${an.totalScore >= 70 ? 'var(--primary)' : 'var(--warning)'};">${an.totalScore} / 100</span>
+        </div>
+
+        <div style="font-weight: 700; margin-bottom: 6px; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Alt Puan Dağılımı</div>
+        <div class="risk-row"><span>Likidite Skoru:</span><span class="mono">${an.subScores.liqScore} / 25</span></div>
+        <div class="risk-row"><span>Momentum Skoru (5d & 1s):</span><span class="mono">${an.subScores.momScore} / 25</span></div>
+        <div class="risk-row"><span>İşlem Hacim Skoru:</span><span class="mono">${an.subScores.volScore} / 25</span></div>
+        <div class="risk-row"><span>Alıcı / Satıcı Dengesi:</span><span class="mono">${an.subScores.buyActScore} / 25</span></div>
+
+        <div style="font-weight: 700; margin: 12px 0 6px 0; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Doğrulanabilir Güvenlik Kontrolleri</div>
+      `;
+
+      an.riskChecks.forEach(rc => {
+        let statusBadge = '';
+        if (rc.safe === true) statusBadge = '<span style="color: var(--primary);">✔ Doğrulandı</span>';
+        else if (rc.safe === false) statusBadge = '<span style="color: var(--danger);">✖ Kritik Risk</span>';
+        else statusBadge = '<span style="color: var(--warning);">⚠ Bilinmiyor</span>';
+
+        html += `
+          <div style="margin-bottom: 8px; padding: 6px; background: rgba(255,255,255,0.02); border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; font-weight: 600;">
+              <span>${rc.title}</span>
+              <span>${statusBadge}</span>
+            </div>
+            <div style="color: var(--text-muted); font-size: 0.68rem; margin-top: 2px;">${rc.desc}</div>
+          </div>
+        `;
+      });
+
+      document.getElementById('scoreBreakdownContent').innerHTML = html;
+      openModal('scoreDetailModal');
+    }
+
+    /* =========================================================
+       YARDIMCI FONKSİYONLAR (HELPERS & MODALS)
+       ========================================================= */
+    function switchTab(tabId) {
+      document.querySelectorAll('.view-page').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+      const target = document.getElementById('view-' + tabId);
+      if (target) target.classList.add('active');
+
+      const btnIndex = ['dashboard', 'scanner', 'portfolio', 'history', 'settings'].indexOf(tabId);
+      if (btnIndex !== -1) {
+        document.querySelectorAll('.nav-btn')[btnIndex].classList.add('active');
+      }
+
+      if (tabId === 'portfolio') renderPortfolio();
+      if (tabId === 'history') renderHistory();
+      if (tabId === 'dashboard') drawEquityChart();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2400);
+    }
+
+    function formatPrice(val) {
+      const num = parseFloat(val);
+      if (isNaN(num)) return '$0.00';
+      if (num < 0.000001) return '$' + num.toFixed(9);
+      if (num < 0.001) return '$' + num.toFixed(6);
+      if (num < 1) return '$' + num.toFixed(4);
+      return '$' + num.toFixed(2);
+    }
+
+    function formatNumber(val, decimals = 1) {
+      const num = parseFloat(val);
+      if (isNaN(num)) return '0';
+      if (num >= 1e6) return (num / 1e6).toFixed(decimals) + 'M';
+      if (num >= 1e3) return (num / 1e3).toFixed(decimals) + 'K';
+      return num.toFixed(decimals);
+    }
+
+    function formatAge(timestamp) {
+      const diffSec = Math.floor((Date.now() - timestamp) / 1000);
+      if (diffSec < 60) return `${diffSec}sn önce`;
+      if (diffSec < 3600) return `${Math.floor(diffSec / 60)}dk önce`;
+      return `${Math.floor(diffSec / 3600)}sa önce`;
+    }
+
+    function shortAddress(addr) {
+      if (!addr) return '';
+      return addr.slice(0, 4) + '...' + addr.slice(-4);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function updateUI() {
+      checkOpenPositionsLivePrice();
+    }
+
+    /* =========================================================
+       BAŞLATMA DÖNGÜSÜ (INIT & LIFECYCLE)
+       ========================================================= */
+    window.addEventListener('DOMContentLoaded', () => {
+      // Ayarları forma aktar
+      document.getElementById('cfgMaxPos').value = state.config.maxPosUsd;
+      document.getElementById('cfgStopLoss').value = state.config.stopLossPercent;
+      document.getElementById('cfgTakeProfit').value = state.config.takeProfitPercent;
+      document.getElementById('cfgMinScore').value = state.config.minScoreToBuy;
+      document.getElementById('cfgFeeSlippage').value = state.config.feeSlippagePercent;
+      document.getElementById('autoBotToggle').checked = state.autoBot;
+
+      if (state.autoBot) {
+        document.getElementById('botDot').className = 'dot active';
+        document.getElementById('botStatusText').textContent = 'Aktif (Otonom Aday Takibi)';
+      }
+
+      fetchLivePairs();
+
+      // 30 saniyelik otomatik yenileme sayacı
+      setInterval(() => {
+        countdownSec--;
+        const lbl = document.getElementById('countdownLabel');
+        if (lbl) lbl.textContent = countdownSec;
+        if (countdownSec <= 0) {
+          fetchLivePairs();
+        }
+      }, 1000);
+
+      window.addEventListener('resize', drawEquityChart);
+    });
+  </script>
+</body>
+</html>
