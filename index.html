@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#07090e" />
+  <title>MEME AI TRADER | İki Aşamalı Solana Radarı</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #07090e;
+      --card-bg: rgba(17, 24, 39, 0.78);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #10b981;
+      --primary-glow: rgba(16, 185, 129, 0.25);
+      --danger: #f43f5e;
+      --warning: #f59e0b;
+      --accent: #38bdf8;
+      --axiom-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+      --axiom-glow: rgba(139, 92, 246, 0.35);
+      --safe-bottom: env(safe-area-inset-bottom, 16px);
+      --safe-top: env(safe-area-inset-top, 16px);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.06) 0px, transparent 50%);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      padding-top: calc(var(--safe-top) + 8px);
+      padding-bottom: calc(var(--safe-bottom) + 24px);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .app-container { max-width: 520px; margin: 0 auto; padding: 0 14px; }
+
+    /* Başlık */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 4px 2px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-icon {
+      width: 34px; height: 34px;
+      background: var(--axiom-gradient);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; color: #fff;
+      box-shadow: 0 0 16px var(--axiom-glow);
+    }
+    .brand-title { font-weight: 800; font-size: 1.1rem; letter-spacing: -0.5px; }
+
+    /* Otomatik Sistem Teşhis & Sağlık Paneli */
+    .health-bar {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      font-size: 0.67rem;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .health-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .health-item { display: inline-flex; align-items: center; gap: 5px; }
+    .dot-ok { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 6px var(--primary); }
+    .dot-warn { width: 7px; height: 7px; border-radius: 50%; background: var(--warning); box-shadow: 0 0 6px var(--warning); }
+    .dot-err { width: 7px; height: 7px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 6px var(--danger); }
+    .dot-busy { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } }
+
+    /* Kategori Butonları */
+    .category-tabs {
+      display: flex;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.45);
+      padding: 4px;
+      border-radius: 14px;
+      border: 1px solid var(--card-border);
+      margin-bottom: 10px;
+    }
+    .cat-btn {
+      flex: 1;
+      padding: 10px 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.76rem;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .cat-btn.active.cat-gem {
+      background: rgba(56, 189, 248, 0.16);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.15);
+    }
+    .cat-btn.active.cat-mom {
+      background: rgba(16, 185, 129, 0.16);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.15);
+    }
+
+    /* Aktif Katı Filtre Kartı */
+    .filter-spec-card {
+      background: rgba(0, 0, 0, 0.38);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 14px;
+      padding: 9px 12px;
+      margin-bottom: 8px;
+      font-size: 0.7rem;
+    }
+    .spec-header {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    .spec-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+    .spec-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      padding: 3px 7px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      color: var(--text);
+    }
+    .spec-pill strong { color: var(--accent); }
+
+    /* Hata ve Durum Bildirim Şeridi (Kesin Hata Ayrımı) */
+    .status-alert-strip {
+      border-radius: 10px;
+      padding: 8px 11px;
+      margin-bottom: 10px;
+      font-size: 0.7rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      line-height: 1.4;
+    }
+    .alert-neutral { background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); color: #7dd3fc; }
+    .alert-error { background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.3); color: #fda4af; }
+    .alert-warn { background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); color: #fde68a; }
+
+    /* Arama ve Yenileme */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .search-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-size: 0.78rem;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .refresh-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 7px 11px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+    .refresh-pill:active { background: rgba(255, 255, 255, 0.12); }
+    .refresh-pill.spinning svg { animation: spin 0.8s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* Token Kartları */
+    .token-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 14px;
+      margin-bottom: 12px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+    .token-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .token-meta { display: flex; align-items: center; gap: 10px; }
+    .token-symbol-wrap {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.82rem; color: var(--accent);
+    }
+    .token-name-box h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .token-age-tag {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Durum Rozetleri */
+    .status-badge {
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 8px;
+      text-transform: uppercase;
+    }
+    .badge-candidate { background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: var(--primary); }
+    .badge-watch { background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.5); color: var(--warning); }
+    .badge-red { background: rgba(244, 63, 94, 0.2); border: 1px solid rgba(244, 63, 94, 0.5); color: var(--danger); }
+
+    /* Metrik Izgarası */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.32);
+      border-radius: 12px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    .metric-item { text-align: center; }
+    .metric-lbl {
+      font-size: 0.58rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .metric-val { font-size: 0.76rem; font-weight: 700; }
+
+    /* Skor Çubuğu */
+    .score-bar-wrap { margin-bottom: 12px; cursor: pointer; }
+    .score-text-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      margin-bottom: 4px;
+    }
+    .bar-bg { height: 6px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; overflow: hidden; display: flex; }
+    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+    /* Butonlar */
+    .action-row { display: flex; gap: 8px; margin-top: 6px; }
+    .btn-axiom {
+      flex: 1.5;
+      background: var(--axiom-gradient);
+      color: #ffffff;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.8rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px var(--axiom-glow);
+    }
+    .btn-axiom:active { transform: scale(0.98); }
+    .btn-copy {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 10px;
+      border-radius: 12px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .btn-copy:active { background: rgba(255, 255, 255, 0.14); }
+    .btn-info {
+      width: 38px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* Toast Bildirim */
+    .toast-msg {
+      position: fixed;
+      top: calc(var(--safe-top) + 12px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-30px);
+      background: #1e1b4b;
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      color: #f3f4f6;
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 200;
+    }
+    .toast-msg.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px);
+      z-index: 150; display: none; align-items: flex-end; justify-content: center;
+      padding-bottom: var(--safe-bottom);
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-content {
+      width: 100%; max-width: 500px; background: #0f1422;
+      border: 1px solid var(--card-border); border-top-left-radius: 24px; border-top-right-radius: 24px;
+      padding: 22px 18px; max-height: 85vh; overflow-y: auto;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+      animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .close-btn { background: rgba(255, 255, 255, 0.1); border: none; color: var(--text-muted); width: 28px; height: 28px; border-radius: 50%; cursor: pointer; }
+
+    .risk-breakdown-box { background: rgba(0, 0, 0, 0.35); border-radius: 12px; padding: 12px; margin: 10px 0; font-size: 0.76rem; }
+    .risk-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .risk-row:last-child { border-bottom: none; }
+
+    .empty-state { text-align: center; padding: 36px 16px; color: var(--text-muted); font-size: 0.82rem; }
+  </style>
+</head>
+<body>
+
+  <div id="toast" class="toast-msg"></div>
+
+  <div class="app-container">
+
+    <!-- Başlık -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">A</div>
+        <div>
+          <div class="brand-title">MEME AI TRADER</div>
+        </div>
+      </div>
+      <div id="statusPulseTag" class="health-item" style="font-size: 0.65rem; color: var(--primary); font-weight: 700;">
+        <span class="dot-ok" id="statusPulseDot"></span>
+        <span id="statusPulseText">2 Aşamalı Radar</span>
+      </div>
+    </header>
+
+    <!-- Otomatik 7 Noktalı Teşhis ve Sağlık Şeridi -->
+    <div class="health-bar">
+      <div class="health-row">
+        <div class="health-item" id="stage1StatusBadge">
+          <span class="dot-busy"></span>
+          <span>Aşama 1 (Keşif): Başlatılıyor...</span>
+        </div>
+        <div class="health-item mono" id="freshnessBadge" style="color: var(--accent);">
+          --:--:--
+        </div>
+      </div>
+      <div class="health-row" style="color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.04); padding-top: 4px;">
+        <div class="health-item" id="stage2StatusBadge">
+          <span class="dot-warn"></span>
+          <span>Aşama 2 (Piyasa/Havuz): Beklemede</span>
+        </div>
+        <div class="health-item" id="rugStatusBadge">
+          <span class="dot-ok"></span>
+          <span>RugCheck: Aktif</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kategori Seçici: EARLY GEMS vs MOMENTUM -->
+    <div class="category-tabs">
+      <button class="cat-btn cat-gem active" id="tabEarlyGems" onclick="switchCategory('early')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        EARLY GEMS (Taze Havuzlar)
+      </button>
+      <button class="cat-btn cat-mom" id="tabMomentum" onclick="switchCategory('momentum')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+        MOMENTUM (İvmelenenler)
+      </button>
+    </div>
+
+    <!-- Aktif Katı Filtre Kartı -->
+    <div class="filter-spec-card">
+      <div class="spec-header">
+        <span id="specTitle">Aktif Katı Ön Filtre Kriterleri:</span>
+        <span id="eligibleCountLabel" style="color: var(--primary); font-weight: 700;">0 Geçti</span>
+      </div>
+      <div class="spec-tags" id="specTags"></div>
+    </div>
+
+    <!-- Kesin Hata ve Eleme Durum Ayrımı Şeridi -->
+    <div class="status-alert-strip alert-neutral" id="statusAlertStrip">
+      <span id="alertMessage">Sistem başlatılıyor...</span>
+    </div>
+
+    <!-- Arama ve Yenileme -->
+    <div class="filter-bar">
+      <input type="text" id="searchInput" class="search-input" placeholder="Sembol veya kontrat filtrele..." oninput="renderPairs()">
+      <button class="refresh-pill" id="refreshBtn" onclick="manualRefresh()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        <span id="countdownLabel">30</span>s
+      </button>
+    </div>
+
+    <!-- Token Kart Listesi -->
+    <main id="tokenCardList">
+      <div class="empty-state">Solana taze token havuzları taranıyor...</div>
+    </main>
+
+  </div>
+
+  <!-- AÇIKLANABİLİR SKOR MODALI -->
+  <div id="scoreModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTokenTitle">Token Analiz Raporu</h3>
+        <button class="close-btn" onclick="closeModal('scoreModal')">&times;</button>
+      </div>
+      <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4;">
+        ⚠️ <strong>Açıklanabilir Algoritma:</strong> Puanlama kesin getiri vaadi içermez. Yalnızca katı sınırları geçen coinlerin likidite derinliğini, alıcı aktivitesini ve RugCheck doğrulamasını matematiksel olarak puanlar.
+      </div>
+      <div class="risk-breakdown-box" id="modalScoreBreakdown"></div>
+      <div id="modalAxiomContainer" style="margin-top: 12px;"></div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================================
+       1. SABİTLER, FİLTRE KURALLARI VE DURUM YÖNETİMİ
+       ========================================================================= */
+    const SOL_MINT = "So11111111111111111111111111111111111111112";
+    const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+
+    const FILTER_RULES = {
+      early: {
+        name: "EARLY GEMS",
+        maxMarketCap: 300000,
+        sweetCapMin: 10000,
+        sweetCapMax: 150000,
+        maxAgeHours: 6,
+        minLiquidityUsd: 5000
+      },
+      momentum: {
+        name: "MOMENTUM",
+        maxMarketCap: 750000,
+        maxAgeHours: 24,
+        minLiquidityUsd: 10000,
+        minVolume5m: 3500
+      }
+    };
+
+    let rawDiscoveredPairs = [];
+    let currentCategory = 'early';
+    let countdownSec = 30;
+    let isFetching = false;
+    let lastSuccessTime = null;
+    let rateLimitCooldownUntil = 0;
+
+    // Teşhis Durum Değişkenleri (Hata Ayrımı İçin)
+    let systemDiagnostic = {
+      apiResponding: false,
+      tokensFoundCount: 0,
+      pairsFetchedCount: 0,
+      filterPassedCount: 0,
+      lastErrorType: null
+    };
+
+    /* =========================================================================
+       2. GÜVENLİ VE TEKİL STREAM FETCH İSTEMCİSİ
+       ========================================================================= */
+    async function safeFetchJson(url, timeoutMs = 7000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+      try {
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timer);
+        const status = res.status;
+
+        if (status === 429) {
+          return { ok: false, status: 429, errorType: 'RATE_LIMIT', message: 'Rate Limit (429): İstek kotası aşıldı.' };
+        }
+        if (status >= 500) {
+          return { ok: false, status, errorType: 'SERVER_ERROR', message: `Sunucu Hatası (${status})` };
+        }
+        if (!res.ok) {
+          return { ok: false, status, errorType: 'HTTP_ERROR', message: `HTTP Hatası (${status})` };
+        }
+
+        const data = await res.json();
+        return { ok: true, status, data };
+      } catch (err) {
+        clearTimeout(timer);
+        if (err.name === 'AbortError') {
+          return { ok: false, status: 0, errorType: 'TIMEOUT', message: 'Zaman aşımı (Timeout)' };
+        }
+        return { ok: false, status: 0, errorType: 'NETWORK_OR_CORS', message: err.message || 'Bağlantı hatası' };
+      }
+    }
+
+    /* =========================================================================
+       3. İKİ AŞAMALI YENİ TOKEN VE PİYASA VERİSİ KEŞİF MOTORU
+       ========================================================================= */
+    async function fetchSolanaRadar(isManual = false) {
+      if (isFetching) return;
+
+      const now = Date.now();
+      if (now < rateLimitCooldownUntil) {
+        const remainingSec = Math.ceil((rateLimitCooldownUntil - now) / 1000);
+        showToast(`Rate limit beklemede: ${remainingSec}sn kaldı.`);
+        return;
+      }
+
+      isFetching = true;
+      updatePulseBadge(true, "Taranıyor...");
+      const refreshBtn = document.getElementById('refreshBtn');
+      if (refreshBtn) refreshBtn.classList.add('spinning');
+
+      // Teşhis sayaçlarını sıfırla
+      systemDiagnostic.apiResponding = false;
+      systemDiagnostic.tokensFoundCount = 0;
+      systemDiagnostic.pairsFetchedCount = 0;
+      systemDiagnostic.filterPassedCount = 0;
+      systemDiagnostic.lastErrorType = null;
+
+      try {
+        /* -------------------------------------------------------------
+           AŞAMA 1: YENİ TOKEN KEŞFİ (Solana Taze Mintleri Toplama)
+           ------------------------------------------------------------- */
+        const s1Badge = document.getElementById('stage1StatusBadge');
+        s1Badge.innerHTML = `<span class="dot-busy"></span><span>Aşama 1: Taze mintler aranıyor...</span>`;
+
+        // DexScreener'ın en son açılan token profillerini ve son güncellenenlerini sorgula
+        const [profRes, recRes] = await Promise.all([
+          safeFetchJson('https://api.dexscreener.com/token-profiles/latest/v1', 6500),
+          safeFetchJson('https://api.dexscreener.com/token-profiles/recent-updates/v1', 6500)
+        ]);
+
+        if (!profRes.ok && !recRes.ok) {
+          const errStatus = profRes.status === 429 || recRes.status === 429 ? 429 : (profRes.status || recRes.status);
+          systemDiagnostic.lastErrorType = errStatus === 429 ? 'RATE_LIMIT' : 'API_NO_RESPONSE';
+          if (errStatus === 429) {
+            rateLimitCooldownUntil = Date.now() + 60000;
+            countdownSec = 60;
+          }
+          s1Badge.innerHTML = `<span class="dot-err"></span><span>Aşama 1: Başarısız (${errStatus})</span>`;
+          updateAlertBanner();
+          return;
+        }
+
+        systemDiagnostic.apiResponding = true;
+
+        // Gelen profillerden Solana tokenlerini ayıkla
+        const candidateMints = new Set();
+        const parseProfiles = (list) => {
+          if (Array.isArray(list)) {
+            list.forEach(item => {
+              if (item.chainId === 'solana' && isValidSolanaMint(item.tokenAddress)) {
+                candidateMints.add(item.tokenAddress);
+              }
+            });
+          }
+        };
+
+        if (profRes.ok) parseProfiles(profRes.data);
+        if (recRes.ok) parseProfiles(recRes.data);
+
+        // Ek Keşif Desteği: Solana arama uç noktasından da taze çiftlerin mintlerini topla
+        const searchRes = await safeFetchJson('https://api.dexscreener.com/latest/dex/search?q=solana', 6000);
+        if (searchRes.ok && Array.isArray(searchRes.data?.pairs)) {
+          searchRes.data.pairs.forEach(p => {
+            if (p.chainId === 'solana') {
+              const meme = extractMemeToken(p);
+              if (meme && isValidSolanaMint(meme.address)) {
+                candidateMints.add(meme.address);
+              }
+            }
+          });
+        }
+
+        const mintsArray = Array.from(candidateMints);
+        systemDiagnostic.tokensFoundCount = mintsArray.length;
+
+        if (mintsArray.length === 0) {
+          s1Badge.innerHTML = `<span class="dot-warn"></span><span>Aşama 1: 0 Solana minti</span>`;
+          updateAlertBanner();
+          return;
+        }
+
+        s1Badge.innerHTML = `<span class="dot-ok"></span><span>Aşama 1: ${mintsArray.length} Mint Keşfedildi</span>`;
+
+        /* -------------------------------------------------------------
+           AŞAMA 2: PİYASA VERİSİ VE ÇOKLU HAVUZ ANALİZİ
+           ------------------------------------------------------------- */
+        const s2Badge = document.getElementById('stage2StatusBadge');
+        s2Badge.innerHTML = `<span class="dot-busy"></span><span>Aşama 2: Havuzlar sorgulanıyor...</span>`;
+
+        // Keşfedilen mintleri DexScreener resmî toplu sorgu formatına sok (max 30 mint)
+        const batchMints = mintsArray.slice(0, 30).join(',');
+        const batchRes = await safeFetchJson(`https://api.dexscreener.com/tokens/v1/solana/${batchMints}`, 7500);
+
+        if (!batchRes.ok || !Array.isArray(batchRes.data)) {
+          systemDiagnostic.lastErrorType = 'API_NO_RESPONSE';
+          s2Badge.innerHTML = `<span class="dot-err"></span><span>Aşama 2: Başarısız (${batchRes.status})</span>`;
+          updateAlertBanner();
+          return;
+        }
+
+        const allPairs = batchRes.data;
+        systemDiagnostic.pairsFetchedCount = allPairs.length;
+
+        // ÇOKLU HAVUZ SEÇİMİ: Bir tokenin birden fazla havuzu varsa en likit olanını seç
+        const bestPoolsByMint = new Map();
+        for (const p of allPairs) {
+          if (p.chainId !== 'solana' || !p.pairAddress) continue;
+          const memeToken = extractMemeToken(p);
+          if (!memeToken || !isValidSolanaMint(memeToken.address)) continue;
+
+          p.targetToken = memeToken;
+          const mint = memeToken.address;
+          const pLiq = p.liquidity ? (p.liquidity.usd || 0) : 0;
+
+          if (!bestPoolsByMint.has(mint)) {
+            bestPoolsByMint.set(mint, p);
+          } else {
+            const existing = bestPoolsByMint.get(mint);
+            const exLiq = existing.liquidity ? (existing.liquidity.usd || 0) : 0;
+            // Daha yüksek likidite ve hacme sahip olan havuzu ana havuz yap
+            if (pLiq > exLiq) {
+              bestPoolsByMint.set(mint, p);
+            }
+          }
+        }
+
+        const resolvedPairs = Array.from(bestPoolsByMint.values());
+        s2Badge.innerHTML = `<span class="dot-ok"></span><span>Aşama 2: ${resolvedPairs.length} Ana Havuz Eşleşti</span>`;
+
+        // RugCheck Güvenlik Taramasını Savunmacı ve Paralel Yürüt
+        const rugBadge = document.getElementById('rugStatusBadge');
+        rugBadge.innerHTML = `<span class="dot-busy"></span><span>RugCheck: Doğrulanıyor...</span>`;
+
+        const topCheckCount = Math.min(6, resolvedPairs.length);
+        const rugPromises = [];
+        for (let i = 0; i < topCheckCount; i++) {
+          const pair = resolvedPairs[i];
+          rugPromises.push(
+            fetchRugCheck(pair.targetToken.address).then(sec => {
+              pair.securityData = sec;
+            }).catch(() => {
+              pair.securityData = getUnknownSecurityData();
+            })
+          );
+        }
+        await Promise.allSettled(rugPromises);
+        rugBadge.innerHTML = `<span class="dot-ok"></span><span>RugCheck: Aktif</span>`;
+
+        for (let i = topCheckCount; i < resolvedPairs.length; i++) {
+          if (!resolvedPairs[i].securityData) {
+            resolvedPairs[i].securityData = getUnknownSecurityData();
+          }
+        }
+
+        // Başarılı Keşif Sonucu: Veriyi güncelle
+        rawDiscoveredPairs = resolvedPairs;
+        lastSuccessTime = Date.now();
+        countdownSec = 30;
+
+        renderPairs();
+        if (isManual) showToast("İki aşamalı canlı tarama tamamlandı.");
+      } catch (err) {
+        console.error("Tarama motoru hatası:", err);
+        systemDiagnostic.lastErrorType = 'API_NO_RESPONSE';
+        updateAlertBanner();
+      } finally {
+        isFetching = false;
+        updatePulseBadge(false);
+        if (refreshBtn) refreshBtn.classList.remove('spinning');
+      }
+    }
+
+    function manualRefresh() {
+      if (isFetching) {
+        showToast("Tarama devam ediyor, lütfen bekleyin.");
+        return;
+      }
+      fetchSolanaRadar(true);
+    }
+
+    /* =========================================================================
+       4. KESİN HATA AYRIMI (ERROR DISCRIMINATION)
+       ========================================================================= */
+    function updateAlertBanner() {
+      const banner = document.getElementById('statusAlertStrip');
+      const msg = document.getElementById('alertMessage');
+
+      // DURUM 1: Veri kaynağı yanıt vermiyor
+      if (!systemDiagnostic.apiResponding) {
+        banner.className = "status-alert-strip alert-error";
+        msg.innerHTML = `<strong>Bağlantı Kesintisi:</strong> Veri kaynağı yanıt vermiyor. (HTTP ${systemDiagnostic.lastErrorType === 'RATE_LIMIT' ? '429 Rate Limit - Bekleniyor' : 'Bağlantı Hatası'})`;
+        return;
+      }
+
+      // DURUM 2: API çalışıyor ama yeni token bulamıyor
+      if (systemDiagnostic.tokensFoundCount === 0 || systemDiagnostic.pairsFetchedCount === 0) {
+        banner.className = "status-alert-strip alert-warn";
+        msg.innerHTML = `<strong>Arama Sonucu:</strong> API çalışıyor ancak yeni token bulunamadı.`;
+        return;
+      }
+
+      // DURUM 3: Tokenler bulunduğu halde filtrelerden geçmiyor
+      if (systemDiagnostic.filterPassedCount === 0) {
+        banner.className = "status-alert-strip alert-warn";
+        msg.innerHTML = `<strong>Filtre Denetimi:</strong> ${systemDiagnostic.pairsFetchedCount} token incelendi; bulunan tokenler mevcut filtre kriterlerini karşılamıyor.`;
+        return;
+      }
+
+      // DURUM 4: Her şey yolunda
+      banner.className = "status-alert-strip alert-neutral";
+      msg.innerHTML = `<strong>Sistem Aktif:</strong> ${systemDiagnostic.pairsFetchedCount} havuz incelendi, ${systemDiagnostic.filterPassedCount} uygun fırsat listelendi.`;
+    }
+
+    function extractMemeToken(pair) {
+      if (pair.baseToken && pair.baseToken.address !== SOL_MINT && pair.baseToken.address !== USDC_MINT) {
+        return pair.baseToken;
+      }
+      if (pair.quoteToken && pair.quoteToken.address !== SOL_MINT && pair.quoteToken.address !== USDC_MINT) {
+        return pair.quoteToken;
+      }
+      return pair.baseToken;
+    }
+
+    function isValidSolanaMint(addr) {
+      return typeof addr === 'string' && addr.length >= 32 && addr.length <= 44 && !addr.includes(' ');
+    }
+
+    async function fetchRugCheck(mint) {
+      if (!mint) return getUnknownSecurityData();
+      const res = await safeFetchJson(`https://api.rugcheck.xyz/v1/tokens/${mint}/report/summary`, 2500);
+      if (!res.ok || !res.data) return getUnknownSecurityData();
+
+      const data = res.data;
+      const risks = data.risks || [];
+      const isMintRevoked = !risks.some(r => r.name && r.name.toLowerCase().includes('mint'));
+      const isFreezeRevoked = !risks.some(r => r.name && r.name.toLowerCase().includes('freeze'));
+      const isTopHoldersConcentrated = risks.some(r => r.name && r.name.toLowerCase().includes('holder'));
+
+      return {
+        source: 'RugCheck API',
+        mintAuthority: isMintRevoked ? 'REVOKED' : 'ACTIVE',
+        freezeAuthority: isFreezeRevoked ? 'REVOKED' : 'ACTIVE',
+        topHolders: isTopHoldersConcentrated ? 'CONCENTRATED' : 'DISTRIBUTED',
+        rugScore: data.score || 0,
+        verified: true
+      };
+    }
+
+    function getUnknownSecurityData() {
+      return {
+        source: 'Doğrulanamadı (Bilinmiyor)',
+        mintAuthority: 'UNKNOWN',
+        freezeAuthority: 'UNKNOWN',
+        topHolders: 'UNKNOWN',
+        rugScore: null,
+        verified: false
+      };
+    }
+
+    /* =========================================================================
+       5. SERT ÖN FİLTRELER VE PUANLAMA (HARD GATING)
+       ========================================================================= */
+    function applyStrictFilterAndScore(pairs, category) {
+      const rules = FILTER_RULES[category];
+      const now = Date.now();
+
+      const passed = [];
+      const rejectionCounts = {
+        missingMcap: 0,
+        highMcap: 0,
+        oldAge: 0,
+        lowLiquidity: 0,
+        insufficientVol: 0
+      };
+
+      for (const p of pairs) {
+        // Kesin Market Cap ve FDV Ayrımı: marketCap yoksa FDV'yi asla yerine koyma!
+        const rawMcap = p.marketCap;
+        if (typeof rawMcap !== 'number' || rawMcap <= 0) {
+          rejectionCounts.missingMcap++;
+          continue;
+        }
+
+        const mcap = rawMcap;
+        const liq = p.liquidity ? (p.liquidity.usd || 0) : 0;
+        const createdAt = p.pairCreatedAt || 0;
+        const ageHours = createdAt > 0 ? (now - createdAt) / (1000 * 60 * 60) : 999;
+        const ageMinutes = ageHours * 60;
+        const v5m = p.volume?.m5 || 0;
+
+        // Kural 1: Maksimum Market Cap
+        if (mcap > rules.maxMarketCap) {
+          rejectionCounts.highMcap++;
+          continue;
+        }
+
+        // Kural 2: Maksimum Yaş
+        if (ageHours > rules.maxAgeHours) {
+          rejectionCounts.oldAge++;
+          continue;
+        }
+
+        // Kural 3: Minimum Likidite
+        if (liq < rules.minLiquidityUsd) {
+          rejectionCounts.lowLiquidity++;
+          continue;
+        }
+
+        // Kural 4: Momentum için minimum 5d hacim
+        if (category === 'momentum' && v5m < rules.minVolume5m) {
+          rejectionCounts.insufficientVol++;
+          continue;
+        }
+
+        const aiScore = calculateExplainableScore(p, mcap, liq, ageHours, ageMinutes, category);
+        p.verifiedMcap = mcap;
+        p.ageHours = ageHours;
+        p.ageMinutes = ageMinutes;
+        p.aiAnalysis = aiScore;
+
+        passed.push(p);
+      }
+
+      systemDiagnostic.filterPassedCount = passed.length;
+      return { passed, rejectionCounts };
+    }
+
+    function calculateExplainableScore(p, mcap, liq, ageHours, ageMinutes, category) {
+      const v5m = p.volume?.m5 || 0;
+      const v1h = p.volume?.h1 || 0;
+      const c5m = p.priceChange?.m5 || 0;
+      const tx5m = p.txns?.m5 || { buys: 0, sells: 0 };
+      const sec = p.securityData || getUnknownSecurityData();
+
+      let earlySub = 0;
+      let momSub = 0;
+      let liqSub = 0;
+      let flowSub = 0;
+
+      if (category === 'early') {
+        if (mcap >= 10000 && mcap <= 150000) earlySub += 15;
+        else if (mcap <= 250000) earlySub += 8;
+        else earlySub += 3;
+
+        if (ageMinutes >= 5 && ageMinutes <= 120) earlySub += 10;
+        else if (ageMinutes <= 240) earlySub += 6;
+        else earlySub += 2;
+      } else {
+        if (mcap <= 400000) earlySub += 15;
+        else earlySub += 7;
+        if (ageHours <= 12) earlySub += 10;
+        else earlySub += 5;
+      }
+
+      const expected5m = (v1h / 12);
+      const volGrowthRatio = expected5m > 0 ? (v5m / expected5m) : 1;
+
+      if (volGrowthRatio >= 2.0 && v5m >= 3000) momSub += 15;
+      else if (volGrowthRatio >= 1.2) momSub += 10;
+      else momSub += 4;
+
+      if (c5m > 0 && c5m <= 80) momSub += 10;
+      else if (c5m > 80 && c5m <= 180) momSub += 5;
+      else if (c5m > 180) momSub += 1;
+      else if (c5m > -10) momSub += 3;
+
+      if (liq >= 25000) liqSub = 25;
+      else if (liq >= 12000) liqSub = 18;
+      else if (liq >= 5000) liqSub = 10;
+      else liqSub = 0;
+
+      const totalTx = tx5m.buys + tx5m.sells;
+      if (totalTx >= 6) {
+        const buyRatio = tx5m.buys / totalTx;
+        if (buyRatio >= 0.58 && buyRatio <= 0.88) flowSub = 25;
+        else if (buyRatio > 0.88 && totalTx >= 15) flowSub = 5;
+        else if (buyRatio >= 0.45) flowSub = 12;
+        else flowSub = 4;
+      } else {
+        flowSub = 8;
+      }
+
+      const totalScore = Math.min(100, Math.round(earlySub + momSub + liqSub + flowSub));
+
+      const checks = [];
+      let isRed = false;
+
+      if (tx5m.buys >= 8 && tx5m.sells === 0) {
+        checks.push({ name: "Satış İşlemi", status: "RED", desc: "5 dakikada 0 satış! (Olası honeypot)" });
+        isRed = true;
+      } else {
+        checks.push({ name: "İki Yönlü İşlem", status: "PASS", desc: `5d: ${tx5m.buys} Alış / ${tx5m.sells} Satış` });
+      }
+
+      if (sec.mintAuthority === 'ACTIVE') {
+        checks.push({ name: "Mint Yetkisi", status: "RED", desc: "Mint açık! Ek token basılabilir." });
+        isRed = true;
+      } else if (sec.mintAuthority === 'REVOKED') {
+        checks.push({ name: "Mint Yetkisi", status: "PASS", desc: "Mint yetkisi iptal edilmiş (Revoked)." });
+      } else {
+        checks.push({ name: "Mint Yetkisi", status: "UNKNOWN", desc: "Zincir üstü doğrulanamadı (Bilinmiyor)." });
+      }
+
+      if (sec.freezeAuthority === 'ACTIVE') {
+        checks.push({ name: "Freeze Yetkisi", status: "RED", desc: "Cüzdan dondurma yetkisi aktif!" });
+        isRed = true;
+      } else if (sec.freezeAuthority === 'REVOKED') {
+        checks.push({ name: "Freeze Yetkisi", status: "PASS", desc: "Dondurma yetkisi iptal edilmiş (Revoked)." });
+      } else {
+        checks.push({ name: "Freeze Yetkisi", status: "UNKNOWN", desc: "Dondurma yetkisi doğrulanamadı (Bilinmiyor)." });
+      }
+
+      let status = "WATCH";
+      if (isRed || totalScore < 45) status = "RED";
+      else if (totalScore >= 70 && liq >= 8000) status = "CANDIDATE";
+
+      return { totalScore, subScores: { earlySub, momSub, liqSub, flowSub }, volGrowthRatio, status, checks };
+    }
+
+    /* =========================================================================
+       6. ARAYÜZ (RENDER) & CANLI GÖRÜNÜM
+       ========================================================================= */
+    function switchCategory(cat) {
+      currentCategory = cat;
+      document.getElementById('tabEarlyGems').classList.toggle('active', cat === 'early');
+      document.getElementById('tabMomentum').classList.toggle('active', cat === 'momentum');
+      renderPairs();
+    }
+
+    function renderPairs() {
+      const container = document.getElementById('tokenCardList');
+      const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+      const rules = FILTER_RULES[currentCategory];
+
+      updateSpecCard(rules);
+
+      const { passed, rejectionCounts } = applyStrictFilterAndScore(rawDiscoveredPairs, currentCategory);
+      updateAlertBanner();
+
+      let displayList = passed;
+      if (searchVal) {
+        displayList = displayList.filter(p => 
+          (p.targetToken.symbol && p.targetToken.symbol.toLowerCase().includes(searchVal)) ||
+          (p.targetToken.name && p.targetToken.name.toLowerCase().includes(searchVal)) ||
+          (p.targetToken.address && p.targetToken.address.toLowerCase().includes(searchVal))
+        );
+      }
+
+      if (currentCategory === 'early') {
+        displayList.sort((a, b) => {
+          const aBlow = (a.priceChange?.m5 || 0) > 180 ? -20 : 0;
+          const bBlow = (b.priceChange?.m5 || 0) > 180 ? -20 : 0;
+          return (b.aiAnalysis.totalScore + bBlow) - (a.aiAnalysis.totalScore + aBlow);
+        });
+      } else {
+        displayList.sort((a, b) => (b.aiAnalysis.volGrowthRatio * b.aiAnalysis.totalScore) - (a.aiAnalysis.volGrowthRatio * a.aiAnalysis.totalScore));
+      }
+
+      document.getElementById('eligibleCountLabel').textContent = `${displayList.length} Geçti`;
+
+      if (displayList.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            Bu kategorinin katı kriterlerini (Cap $\\le$ $${formatNumber(rules.maxMarketCap)}, Yaş $\\le$ ${rules.maxAgeHours}sa, Likidite $\\ge$ $${formatNumber(rules.minLiquidityUsd)}) karşılayan coin bulunamadı.<br><br>
+            <span style="font-size: 0.72rem; color: var(--accent);">Bulunan tokenler filtrelere takıldı. Eski veya şişmiş coinler kesinlikle listelenmez.</span>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = displayList.map(p => createTokenCardHTML(p)).join('');
+    }
+
+    function updateSpecCard(rules) {
+      document.getElementById('specTitle').textContent = `${rules.name} Kesin Filtreleri:`;
+      document.getElementById('specTags').innerHTML = `
+        <span class="spec-pill">Maks. Cap: <strong>$${formatNumber(rules.maxMarketCap)}</strong></span>
+        <span class="spec-pill">Maks. Yaş: <strong>${rules.maxAgeHours}sa</strong></span>
+        <span class="spec-pill">Min. Likidite: <strong>$${formatNumber(rules.minLiquidityUsd)}</strong></span>
+        ${rules.sweetCapMax ? `<span class="spec-pill" style="border-color: rgba(56,189,248,0.4);">Hedef Cap: <strong>$10k-$150k</strong></span>` : ''}
+      `;
+    }
+
+    function createTokenCardHTML(p) {
+      const an = p.aiAnalysis;
+      const token = p.targetToken;
+      const mintAddress = token.address;
+      const axiomUrl = `https://axiom.trade/meme/${mintAddress}`;
+
+      const statusClass = an.status === 'CANDIDATE' ? 'badge-candidate' : (an.status === 'WATCH' ? 'badge-watch' : 'badge-red');
+      const statusText = an.status === 'CANDIDATE' ? 'ADAY' : (an.status === 'WATCH' ? 'İZLE' : 'RİSKLİ (RED)');
+
+      const ageText = formatAgeMinutes(p.ageMinutes);
+      const c5m = p.priceChange?.m5 || 0;
+      const v5m = p.volume?.m5 || 0;
+      const v1h = p.volume?.h1 || 0;
+      const buys = p.txns?.m5?.buys || 0;
+      const sells = p.txns?.m5?.sells || 0;
+      const barColor = an.totalScore >= 70 ? 'var(--primary)' : (an.totalScore >= 45 ? 'var(--warning)' : 'var(--danger)');
+
+      return `
+        <div class="token-card">
+          <div class="token-top">
+            <div class="token-meta">
+              <div class="token-symbol-wrap">${escapeHtml((token.symbol || '?').substring(0, 4))}</div>
+              <div class="token-name-box">
+                <h3>${escapeHtml(token.symbol)} <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: normal;">/ SOL</span></h3>
+                <div class="token-age-tag">
+                  Yaş: <strong style="color: var(--accent);">${ageText}</strong> • <span class="mono">${shortAddress(mintAddress)}</span>
+                </div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <span class="status-badge ${statusClass}">${statusText}</span>
+              <div class="mono" style="font-size: 0.95rem; font-weight: 800; margin-top: 4px;">${formatPrice(p.priceUsd)}</div>
+            </div>
+          </div>
+
+          <div class="metric-grid mono">
+            <div class="metric-item">
+              <div class="metric-lbl">Market Cap</div>
+              <div class="metric-val" style="color: #38bdf8;">$${formatNumber(p.verifiedMcap)}</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-lbl">Likidite</div>
+              <div class="metric-val">$${formatNumber(p.liquidity ? p.liquidity.usd : 0)}</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-lbl">5d Hacim</div>
+              <div class="metric-val">$${formatNumber(v5m)}</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-lbl">1s Hacim</div>
+              <div class="metric-val">$${formatNumber(v1h)}</div>
+            </div>
+          </div>
+
+          <div class="score-bar-wrap" onclick="openScoreModal('${p.pairAddress}')">
+            <div class="score-text-row">
+              <span style="color: var(--text-muted);">AI Skoru: <strong style="color: ${barColor};">${an.totalScore}/100</strong> (İncele &rarr;)</span>
+              <span style="font-size: 0.68rem; color: ${c5m >= 0 ? 'var(--primary)' : 'var(--danger)'};">
+                5d: ${c5m >= 0 ? '+' : ''}${c5m}% • Al/Sat: ${buys}/${sells}
+              </span>
+            </div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: ${an.totalScore}%; background: ${barColor};"></div>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <a href="${axiomUrl}" target="_blank" rel="noopener noreferrer" class="btn-axiom">
+              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+              AXIOM’DA AÇ
+            </a>
+            <button class="btn-copy" onclick="copyContract('${mintAddress}')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+              Kopyala
+            </button>
+            <button class="btn-info" onclick="openScoreModal('${p.pairAddress}')" title="Detay">
+              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function copyContract(mintAddress) {
+      if (!mintAddress || !isValidSolanaMint(mintAddress)) {
+        showToast("Geçersiz kontrat adresi!");
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(mintAddress);
+        showToast(`Kontrat kopyalandı: ${shortAddress(mintAddress)}`);
+      } catch (err) {
+        const ta = document.createElement('textarea');
+        ta.value = mintAddress;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast(`Kontrat kopyalandı!`);
+      }
+    }
+
+    function openScoreModal(pairAddress) {
+      const p = rawDiscoveredPairs.find(x => x.pairAddress === pairAddress);
+      if (!p || !p.aiAnalysis) return;
+      const an = p.aiAnalysis;
+      const token = p.targetToken;
+
+      document.getElementById('modalTokenTitle').textContent = `${token.symbol} Şeffaf Rapor`;
+
+      let html = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+          <span style="font-weight: 700;">AI Skoru:</span>
+          <span class="mono" style="font-size: 1.25rem; font-weight: 800; color: ${an.totalScore >= 70 ? 'var(--primary)' : 'var(--warning)'};">${an.totalScore} / 100</span>
+        </div>
+
+        <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">Puan Dağılımı</div>
+        <div class="risk-row"><span>Erken Aşama & Hedef Cap ($10k-$150k):</span><span class="mono">${an.subScores.earlySub} / 25</span></div>
+        <div class="risk-row"><span>Momentum & Hacim Artışı:</span><span class="mono">${an.subScores.momSub} / 25</span></div>
+        <div class="risk-row"><span>Likidite Derinliği:</span><span class="mono">${an.subScores.liqSub} / 25</span></div>
+        <div class="risk-row"><span>Alıcı / Satıcı Akışı:</span><span class="mono">${an.subScores.flowSub} / 25</span></div>
+
+        <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin: 12px 0 6px 0;">Güvenlik Kontrolleri</div>
+      `;
+
+      an.checks.forEach(c => {
+        let tag = '';
+        if (c.status === 'PASS') tag = '<span style="color: var(--primary); font-weight: 700;">✔ GEÇTİ</span>';
+        else if (c.status === 'RED') tag = '<span style="color: var(--danger); font-weight: 700;">✖ RİSKLİ (RED)</span>';
+        else tag = '<span style="color: var(--warning); font-weight: 700;">⚠ BİLİNMİYOR</span>';
+
+        html += `
+          <div style="margin-bottom: 6px; padding: 6px 8px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.74rem;">
+              <span>${c.name}</span>
+              <span>${tag}</span>
+            </div>
+            <div style="color: var(--text-muted); font-size: 0.65rem; margin-top: 2px;">${c.desc}</div>
+          </div>
+        `;
+      });
+
+      document.getElementById('modalScoreBreakdown').innerHTML = html;
+      document.getElementById('modalAxiomContainer').innerHTML = `
+        <a href="https://axiom.trade/meme/${token.address}" target="_blank" rel="noopener noreferrer" class="btn-axiom" style="width: 100%; padding: 12px;">
+          BU COİNİ AXIOM'DA AÇ
+        </a>
+      `;
+
+      openModal('scoreModal');
+    }
+
+    function updatePulseBadge(isBusy, customText = null) {
+      const dot = document.getElementById('statusPulseDot');
+      const text = document.getElementById('statusPulseText');
+      if (isBusy) {
+        dot.className = 'dot-busy';
+        text.textContent = customText || 'Taranıyor...';
+      } else {
+        dot.className = 'dot-ok';
+        text.textContent = '2 Aşamalı Radar';
+      }
+    }
+
+    function updateFreshnessTicker() {
+      const fb = document.getElementById('freshnessBadge');
+      if (!lastSuccessTime) {
+        fb.textContent = "Veri bekleniyor";
+        return;
+      }
+      const elapsedSec = Math.floor((Date.now() - lastSuccessTime) / 1000);
+      const timeStr = new Date(lastSuccessTime).toLocaleTimeString('tr-TR');
+
+      if (elapsedSec < 60) {
+        fb.style.color = "var(--primary)";
+        fb.textContent = `${elapsedSec}sn önce (${timeStr})`;
+      } else {
+        fb.style.color = "var(--warning)";
+        fb.textContent = `⚠️ ${Math.floor(elapsedSec / 60)}dk önce (${timeStr})`;
+      }
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    function formatPrice(val) {
+      const num = parseFloat(val);
+      if (isNaN(num)) return '$0.00';
+      if (num < 0.000001) return '$' + num.toFixed(9);
+      if (num < 0.001) return '$' + num.toFixed(6);
+      if (num < 1) return '$' + num.toFixed(4);
+      return '$' + num.toFixed(2);
+    }
+
+    function formatNumber(val, decimals = 1) {
+      const num = parseFloat(val);
+      if (isNaN(num)) return '0';
+      if (num >= 1e6) return (num / 1e6).toFixed(decimals) + 'M';
+      if (num >= 1e3) return (num / 1e3).toFixed(decimals) + 'K';
+      return num.toFixed(decimals);
+    }
+
+    function formatAgeMinutes(mins) {
+      if (mins < 60) return `${Math.floor(mins)}dk önce`;
+      const hrs = Math.floor(mins / 60);
+      const remainMins = Math.floor(mins % 60);
+      return `${hrs}sa ${remainMins}dk önce`;
+    }
+
+    function shortAddress(addr) {
+      if (!addr) return '';
+      return addr.slice(0, 4) + '...' + addr.slice(-4);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchSolanaRadar();
+
+      setInterval(() => {
+        updateFreshnessTicker();
+        if (isFetching) return;
+
+        countdownSec--;
+        const lbl = document.getElementById('countdownLabel');
+        if (lbl) lbl.textContent = Math.max(0, countdownSec);
+
+        if (countdownSec <= 0) {
+          fetchSolanaRadar();
+        }
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
